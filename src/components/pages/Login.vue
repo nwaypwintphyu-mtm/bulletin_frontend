@@ -4,6 +4,10 @@
       <nav class="bg-success text-light p-3 text-start">
         <h6>Login</h6>
       </nav>
+      <div v-if="errorMessage" class="error-box p-3 text-start">
+        {{ errorMessage }}
+      </div>
+
       <div class="card-body">
         <form @submit.prevent="login">
           <div class="w-75 m-auto">
@@ -44,7 +48,9 @@
                 <label for="rememberMe" class="ms-2">Remember me</label>
               </div>
               <div class="col-md-4 text-end">
-                <router-link to="/forgot" class="text-decoration-none">Forgotten password?</router-link>
+                <router-link to="/forgot" class="text-decoration-none"
+                  >Forgotten password?</router-link
+                >
               </div>
             </div>
             <div class="mb-4 row">
@@ -88,16 +94,19 @@ export default {
       emailFomatError: "",
       passwordError: "",
       allFieldError: "",
+      emailNotMatchError: "",
     });
 
     onMounted(() => {
       const savedEmail = localStorage.getItem("savedEmail");
-      if (savedEmail) {
+      const savedPassword = localStorage.getItem("savedPassword");
+
+      if (savedEmail && savedPassword) {
         email.value = savedEmail;
+        password.value = savedPassword;
         rememberMe.value = true;
       }
     });
-
     async function login() {
       state.emailError = "";
       state.passwordError = "";
@@ -128,19 +137,34 @@ export default {
           }),
         });
 
-        if (response.status == 200) {
+        if (response.status === 200) {
+          const data = await response.json();
+          const user = data.user;
+
+          localStorage.setItem("user", JSON.stringify(user));
+
           if (rememberMe.value) {
             localStorage.setItem("savedEmail", email.value);
+            localStorage.setItem("savedPassword", password.value);
           } else {
             localStorage.removeItem("savedEmail");
+            localStorage.removeItem("savedPassword");
           }
           router.push({ path: "/posts" });
         } else {
           const data = await response.json();
-          errorMessage.value = data.error || "Login failed. Please try again.";
+          if (response.status === 404) {
+            errorMessage.value = data.error || "Email doesn't exist.";
+          } else if (response.status === 401) {
+            errorMessage.value = data.error || "Incorrect password.";
+          } else {
+            state.value.notMatchError =
+              data.error || "Login failed. Please try again.";
+          }
+          errorMessage.value = data.error;
         }
       } catch (error) {
-        errorMessage.value = error.message;
+        errorMessage.value = "An error occurred. Please try again.";
       }
     }
 
@@ -150,6 +174,7 @@ export default {
       login,
       state,
       rememberMe,
+      errorMessage,
     };
   },
 };
@@ -158,5 +183,9 @@ export default {
 <style lang="scss" scoped>
 .card {
   border: 1px solid #e0e0e0;
+}
+.error-box {
+  background-color: rgba(255, 0, 0, 0.133);
+  color: rgb(201, 0, 0);
 }
 </style>
