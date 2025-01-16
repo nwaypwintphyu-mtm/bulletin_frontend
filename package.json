@@ -13,10 +13,12 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "bootstrap": "^5.3.3",
+    "bootstrap-switch-button": "^1.1.0",
     "font-awesome": "^4.7.0",
     "pinia": "^2.3.0",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "vuetify": "^3.7.6"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

@@ -56,7 +56,7 @@
             <div class="mb-4 row">
               <div class="col-sm-3"></div>
               <div class="col-sm-9">
-                <button type="submit" class="btn btn-success w-100">
+                <button type="submit" class="btn bg-success w-100">
                   Login
                 </button>
               </div>

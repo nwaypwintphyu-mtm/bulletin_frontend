@@ -79,7 +79,7 @@ export default {
         );
         if (response.status === 200) {
           localStorage.removeItem("user");
-          router.push({ path: "/login" });
+          router.push({ path: "/" });
         } else {
           const errorData = await response.json();
           console.error(errorData.message);

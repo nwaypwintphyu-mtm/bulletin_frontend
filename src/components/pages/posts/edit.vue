@@ -12,7 +12,7 @@
               {{ duplicateNameError }}
             </div>
             <div class="mb-4 m-auto row">
-              <label for="title" class="col-sm-3 col-form-label text-end"
+              <label for="title" class="required col-sm-3 col-form-label text-end"
                 >Title</label
               >
               <div class="col-sm-5">
@@ -28,7 +28,7 @@
               </div>
             </div>
             <div class="mb-4 m-auto row">
-              <label for="description" class="col-sm-3 col-form-label text-end"
+              <label for="description" class="required col-sm-3 col-form-label text-end"
                 >Description</label
               >
               <div class="col-sm-5">
@@ -44,9 +44,20 @@
               </div>
             </div>
             <div class="mb-4 m-auto row">
+              <label for="status" class="mt-2 col-sm-3 col-form-label text-end"
+                >Status</label
+              >
+              <div class="col-sm-5">
+                <SwitchButton
+                  :status="state.post.status"
+                  @get-status="getSwtichValue"
+                />
+              </div>
+            </div>
+            <div class="mb-4 m-auto row">
               <div class="col-sm-3"></div>
               <div class="col-sm-5">
-                <button class="btn btn-success">Edit</button>&nbsp;
+                <button class="btn bg-success">Edit</button>&nbsp;
                 <button
                   type="button"
                   class="btn btn-secondary"
@@ -69,27 +80,34 @@ import SubHeader from "../../Layouts/SubHeader.vue";
 import { usePostsStore } from "../../../stores/posts";
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
+import SwitchButton from "../../compos/SwitchBtn.vue";
 
 export default {
   components: {
     SubHeader,
+    SwitchButton,
   },
 
   setup() {
     const postsStore = usePostsStore();
     const route = useRoute();
     const router = useRouter();
-    const duplicateNameError = ref();
+    const duplicateNameError = ref("");
+    const titleError = ref("");
+    const descriptionError = ref("");
+    const status = ref(0);
 
     const state = reactive({
       post: {
         title: "",
         description: "",
+        status: 0,
       },
     });
 
-    const titleError = ref("");
-    const descriptionError = ref("");
+    function getSwtichValue(switch_staus) {
+      state.post.status = switch_staus;
+    }
 
     onMounted(() => {
       loadPost();
@@ -98,9 +116,11 @@ export default {
     async function loadPost() {
       const postId = route.params.id;
       const post = await postsStore.getPostById(postId);
+
       if (post) {
         state.post.title = post.title;
         state.post.description = post.description;
+        state.post.status = post.status;
       }
     }
 
@@ -150,6 +170,7 @@ export default {
       edit,
       clearForm,
       duplicateNameError,
+      getSwtichValue,
     };
   },
 };
@@ -166,7 +187,7 @@ export default {
 label {
   position: relative;
 }
-label::after {
+.required::after {
   content: "*";
   color: red;
   margin-left: 4px;

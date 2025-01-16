@@ -12,12 +12,12 @@
             <div class="col-md-3">
               <input type="text" v-model="searchText" class="form-control" />
             </div>
-            <div class="btn btn-success col-md-1" @click="search">Search</div>
-            <div class="btn btn-success col-md-1" @click="toCreatePage">
+            <div class="btn bg-success col-md-1" @click="search">Search</div>
+            <div class="btn bg-success col-md-1" @click="toCreatePage">
               Create
             </div>
-            <div class="btn btn-success col-md-1">Upload</div>
-            <div class="btn btn-success col-md-1">Download</div>
+            <div class="btn bg-success col-md-1">Upload</div>
+            <div class="btn bg-success col-md-1">Download</div>
           </div>
           <table class="table table-striped table-bordered">
             <thead>
@@ -31,7 +31,111 @@
             </thead>
             <tbody>
               <tr v-for="post in paginatedPosts" :key="post.id">
-                <td>{{ post.title }}</td>
+                <td>
+                  <a
+                    data-toggle="modal"
+                    data-target="#postDetailModal"
+                    @click="setSelectedPost(post)"
+                    class="text-success text-decoration-none"
+                    role="button"
+                  >
+                    {{ post.title }}
+                  </a>
+                  <div
+                    class="modal fade"
+                    id="postDetailModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="postDetailModalTitle"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="modal-dialog modal-dialog-centered"
+                      role="document"
+                    >
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h6
+                            class="modal-title col-md-11"
+                            id="exampleModalLongTitle"
+                          >
+                            Post Detail
+                          </h6>
+                          <button
+                            type="button"
+                            class="close btn btn-none text-end"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                          >
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <table class="table">
+                            <tbody>
+                              <tr>
+                                <td><b>Title</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.title }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Description</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.description }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Status</b></td>
+                                <td class="text-danger">
+                                  <span v-if="state.selectedPost.status == 1"
+                                    >Active</span
+                                  >
+                                  <span v-if="state.selectedPost.status == 0"
+                                    >Inactive</span
+                                  >
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Created Date</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.created_at }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Created User</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.user_name }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Updated Date</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.updated_at }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Updated User</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.user_name }}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="modal-footer">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-secondary"
+                            data-dismiss="modal"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
                 <td>{{ post.description }}</td>
                 <td>{{ post.create_user_id }}</td>
                 <td>{{ formatDate(post.created_at) }}</td>
@@ -83,31 +187,32 @@
                         <div class="modal-body">
                           <div><h5>Are you sure to delete post?</h5></div>
                           <table class="table">
-                            <tr>
-                              <td><b>ID</b></td>
-                              <td class="text-danger">
-                                {{ state.selectedPost.id }}
-                              </td>
-                              <br />
-                            </tr>
-                            <tr>
-                              <td><b>Title</b></td>
-                              <td class="text-danger">
-                                {{ state.selectedPost.title }}
-                              </td>
-                            </tr>
-                            <tr>
-                              <td><b>Description</b></td>
-                              <td class="text-danger">
-                                {{ state.selectedPost.description }}
-                              </td>
-                            </tr>
-                            <tr>
-                              <td><b>Status</b></td>
-                              <td class="text-danger">
-                                {{ state.selectedPost.status }}
-                              </td>
-                            </tr>
+                            <tbody>
+                              <tr>
+                                <td><b>ID</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.id }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Title</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.title }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Description</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.description }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><b>Status</b></td>
+                                <td class="text-danger">
+                                  {{ state.selectedPost.status }}
+                                </td>
+                              </tr>
+                            </tbody>
                           </table>
                         </div>
                         <div class="modal-footer">
@@ -136,7 +241,11 @@
             </tbody>
           </table>
           <div class="pagination">
-            <button @click="prevPage" :disabled="currentPage.value === 1">
+            <button
+              @click="prevPage"
+              class="bg-success"
+              :disabled="currentPage.value === 1"
+            >
               Previous
             </button>
             <button
@@ -144,12 +253,16 @@
               :key="page"
               @click="goToPage(page)"
               :disabled="currentPage.value === page"
+              :class="
+                currentPage.value === page ? 'bg-dark-green' : 'bg-success'
+              "
             >
               {{ page }}
             </button>
             <button
               @click="nextPage"
               :disabled="currentPage.value === totalPages"
+              class="bg-success"
             >
               Next
             </button>
@@ -177,6 +290,7 @@ export default {
     const postsStore = usePostsStore();
     const router = useRouter();
     const searchText = ref("");
+    const userRole = localStorage.getItem("user");
 
     const state = reactive({
       posts: [],
@@ -298,7 +412,7 @@ export default {
 }
 
 .table th {
-  background-color: #005e3d9e;
+  background-color: #5aa300ac;
   color: white;
 }
 
@@ -331,14 +445,16 @@ export default {
   margin: 0 10px;
   padding: 5px 10px;
   border: none;
-  background-color: #005e3d;
   color: white;
   cursor: pointer;
   border-radius: 5px;
 }
 
 .pagination button:disabled {
-  background-color: #ccc;
   cursor: not-allowed;
+}
+.bg-dark-green {
+  background-color: #5aa300ac;
+  color: white;
 }
 </style>

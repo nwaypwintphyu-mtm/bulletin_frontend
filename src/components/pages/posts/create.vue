@@ -12,7 +12,9 @@
               {{ duplicateNameError }}
             </div>
             <div class="mb-4 m-auto row">
-              <label for="title" class="col-sm-3 col-form-label text-end"
+              <label
+                for="title"
+                class="required col-sm-3 col-form-label text-end"
                 >Title</label
               >
               <div class="col-sm-5">
@@ -30,7 +32,9 @@
               </div>
             </div>
             <div class="mb-4 m-auto row">
-              <label for="description" class="col-sm-3 col-form-label text-end"
+              <label
+                for="description"
+                class="required col-sm-3 col-form-label text-end"
                 >Description</label
               >
               <div class="col-sm-5">
@@ -48,7 +52,7 @@
             <div class="mb-4 m-auto row">
               <div class="col-sm-3"></div>
               <div class="col-sm-5">
-                <button class="btn btn-success">Create</button>&nbsp;
+                <button class="btn bg-success">Create</button>&nbsp;
                 <button
                   type="button"
                   class="btn btn-secondary"
@@ -148,13 +152,13 @@ label {
   position: relative;
 }
 
-label::after {
+.required::after {
   content: "*";
   color: red;
   margin-left: 4px;
 }
-.error-box{
-  border:1px solid rgba(255, 0, 0, 0.43);
-  background-color:rgba(255, 0, 0, 0.04);
+.error-box {
+  border: 1px solid rgba(255, 0, 0, 0.43);
+  background-color: rgba(255, 0, 0, 0.04);
 }
 </style>
