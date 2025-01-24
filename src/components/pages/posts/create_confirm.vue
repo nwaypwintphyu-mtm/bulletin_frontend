@@ -4,9 +4,9 @@
     <div class="d-flex container flex-column content-box">
       <div class="flex-fill border-success card">
         <SubHeader title="Create Post" />
-        <Button label="Back" route="/posts" />
+        <Button label="Back" route="/posts/create" />
         <div class="p-3">
-          <form @submit.prevent="toCreateConfirm">
+          <form @submit.prevent="create">
             <div class="w-75 m-auto">
               <div
                 v-if="duplicateNameError"
@@ -55,13 +55,13 @@
               <div class="mb-4 m-auto row">
                 <div class="col-sm-3"></div>
                 <div class="col-sm-5">
-                  <button class="btn bg-success">Create</button>&nbsp;
+                  <button class="btn bg-success">Confirm</button>&nbsp;
                   <button
                     type="button"
                     class="btn btn-secondary"
                     @click="clearForm"
                   >
-                    Clear
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -75,31 +75,41 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import Header from "../../Layouts/Header.vue";
+
 import Footer from "../../Layouts/Footer.vue";
 
+import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
+import { usePostsStore } from "../../../stores/posts";
 import Button from "../../compos/Button.vue";
 
 export default {
   components: {
-    SubHeader,
-    Button,
     Header,
+    SubHeader,
     Footer,
+    Button,
   },
 
   setup() {
+    const route = useRoute();
     const router = useRouter();
     const title = ref("");
     const description = ref("");
     const titleError = ref("");
     const descriptionError = ref("");
     const duplicateNameError = ref("");
+    const postsStore = usePostsStore();
 
-    function toCreateConfirm() {
+    onMounted(() => {
+      title.value = route.query.title;
+      description.value = route.query.description;
+    });
+
+    async function create() {
       titleError.value = "";
       descriptionError.value = "";
 
@@ -116,7 +126,14 @@ export default {
           title: title.value,
           description: description.value,
         };
-        router.push({ path: "/posts/create/confirm", query: params });
+        try {
+          const response = await postsStore.createPost(params);
+          if (response.status === 200) {
+            router.push({ path: "/posts" });
+          }
+        } catch (error) {
+          console.error("Error creating post:", error);
+        }
       }
     }
 
@@ -133,7 +150,7 @@ export default {
       description,
       descriptionError,
       duplicateNameError,
-      toCreateConfirm,
+      create,
       clearForm,
     };
   },
@@ -145,7 +162,6 @@ export default {
   position: relative;
   min-height: 100vh;
 }
-
 .content-box {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   padding: 20px;

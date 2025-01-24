@@ -17,16 +17,18 @@
       <div class="d-flex justify-content-between w-100">
         <div class="navbar-nav">
           <div class="nav-item">
-            <a class="nav-link text-success" href="#">Users</a>
+            <a class="nav-link text-success" @click="toUser" href="#">Users</a>
           </div>
           <div class="nav-item">
-            <a class="nav-link text-success" href="#">Posts</a>
+            <a class="nav-link text-success" href="#" @click="toPost">Posts</a>
           </div>
         </div>
 
         <div class="d-flex align-items-center">
           <div class="nav-item">
-            <a class="nav-link text-success me-4" href="#">Create User</a>
+            <a class="nav-link text-success me-4" @click="toCreateUser" href="#"
+              >Create User</a
+            >
           </div>
           <div class="nav-item dropdown">
             <a
@@ -38,11 +40,11 @@
               aria-haspopup="true"
               aria-expanded="false"
             >
-              {{ user ? user.name : ""}}
+              {{ user ? user.name : "" }}
               <i class="fa fa-user"></i>
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Profile</a>
+              <button class="dropdown-item" @click="toProfile">Profile</button>
               <button class="dropdown-item" @click="logout">Logout</button>
             </div>
           </div>
@@ -55,47 +57,59 @@
 <script>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useUsersStore } from "../../stores/users";
 
 export default {
   setup() {
     const router = useRouter();
     const user = ref(null);
+    const usersStore = useUsersStore();
 
     onMounted(() => {
-      const savedUser = localStorage.getItem("user");
+      const savedUser = usersStore.current_user;
       if (savedUser) {
-        user.value = JSON.parse(savedUser);
+        user.value = savedUser;
       }
     });
 
-    const logout = async () => {
+    const toPost = () => {
+      router.push({ name: "Posts" });
+    };
+
+    const toUser = () => {
+      router.push({ name: "Users" });
+    };
+
+    async function logout() {
+      const userId = user.value.id;
       try {
-        const userId = user.value.id;
-        const response = await fetch(
-          `http://localhost:3002/api/v1/sessions/${userId}`,
-          {
-            method: "DELETE",
-          }
-        );
+        const response = await usersStore.userLogout(userId);
         if (response.status === 200) {
-          localStorage.removeItem("user");
-          router.push({ path: "/" });
-        } else {
-          const errorData = await response.json();
-          console.error(errorData.message);
+          router.push({ name: "Login" });
         }
       } catch (error) {
         console.error("Network error:", error);
       }
-    };
+    }
+
+    function toProfile() {
+      router.push({ name: "UserProfile" });
+    }
+
+    function toCreateUser() {
+      router.push({ name: "Register" });
+    }
 
     return {
       user,
       logout,
+      toPost,
+      toUser,
+      toProfile,
+      toCreateUser
     };
   },
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -1,10 +1,19 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "../components/pages/Login.vue";
 import Posts from "../components/pages/posts/index.vue";
-import Register from "../components/pages/Register.vue";
-import CreatePost from "../components/pages/posts/create.vue";
-import EditPost from "../components/pages/posts/edit.vue";
+import Users from "../components/pages/users/index.vue";
+import Register from "../components/pages/users/register.vue";
+import UserProfile from "../components/pages/users/profile.vue";
+import EditProfile from "../components/pages/users/edit.vue";
+import PostsCreate from "../components/pages/posts/create.vue";
+import PostCreateConfirm from "../components/pages/posts/create_confirm.vue";
+import PostEdit from "../components/pages/posts/edit.vue";
+import PostEditConfirm from "../components/pages/posts/edit_confirm.vue";
+import PostsUpload from "../components/pages/posts/upload.vue";
+import RegisterConfirm from "../components/pages/users/register_confirm.vue";
 import ForgotPassword from "../components/pages/ForgotPassword.vue";
+import ChangePassword from "../components/pages/users/change_password.vue";
+import { useUsersStore } from "../stores/users";
 
 const routes = [
   {
@@ -13,14 +22,31 @@ const routes = [
     component: Login,
   },
   {
+    path: "/user/profile/changepassword",
+    name: "ChangePassword",
+    component: ChangePassword,
+  },
+  {
+    path: "/user/profile",
+    name: "UserProfile",
+    component: UserProfile,
+  },
+  {
+    path: "/user/profile/edit",
+    name: "EditProfile",
+    component: EditProfile,
+  },
+  {
     path: "/posts",
-    name: "Post",
+    name: "Posts",
     component: Posts,
+    meta: { requiresAuth: true },
   },
   {
     path: "/register",
     name: "Register",
     component: Register,
+    meta: { requiresAuth: true },
   },
   {
     path: "/forgot",
@@ -29,19 +55,64 @@ const routes = [
   },
   {
     path: "/posts/create",
-    name: "CreatePost",
-    component: CreatePost,
+    name: "PostsCreate",
+    component: PostsCreate,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/posts/upload",
+    name: "PostsUpload",
+    component: PostsUpload,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/posts/create/confirm",
+    name: "PostCreateConfirm",
+    component: PostCreateConfirm,
+    meta: { requiresAuth: true },
   },
   {
     path: "/posts/edit/:id",
-    name: "EditPost",
-    component: EditPost,
+    name: "PostEdit",
+    component: PostEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/posts/edit/confirm",
+    name: "PostEditConfirm",
+    component: PostEditConfirm,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/users",
+    name: "Users",
+    component: Users,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/user/register/confirm",
+    name: "RegisterConfirm",
+    component: RegisterConfirm,
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const usersStore = useUsersStore();
+  const isAuthenticated = usersStore.current_user !== null;
+
+  if (
+    to.matched.some((record) => record.meta.requiresAuth) &&
+    !isAuthenticated
+  ) {
+    next({ name: "Login" });
+  } else {
+    next();
+  }
 });
 
 export default router;

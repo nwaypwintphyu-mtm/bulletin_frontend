@@ -1,14 +1,26 @@
 import { defineStore } from "pinia";
+import { useUsersStore } from "../stores/users";
 
 export const usePostsStore = defineStore("posts", {
   state: () => ({
+    post: "",
     posts: [],
     successMessage: "",
   }),
   actions: {
+    getCurrentUserId() {
+      const usersStore = useUsersStore();
+      return usersStore.current_user ? usersStore.current_user.id : null;
+    },
     async getPosts() {
+      const userId = this.getCurrentUserId();
       try {
-        const response = await fetch("http://localhost:3002/api/v1/posts");
+        const response = await fetch(
+          `http://localhost:3002/api/v1/posts?user_id=${userId}`,
+          {
+            method: "GET",
+          }
+        );
         if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
@@ -18,6 +30,7 @@ export const usePostsStore = defineStore("posts", {
         console.error("Failed to fetch posts:", error);
       }
     },
+
     async getPostById(id) {
       try {
         const response = await fetch(
@@ -33,15 +46,54 @@ export const usePostsStore = defineStore("posts", {
       }
       return this.posts;
     },
-    async createPost(params) {
+    async uploadPost(params) {
+      const userId = this.getCurrentUserId();
+      
       try {
-        const response = await fetch("http://localhost:3002/api/v1/posts", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ post: params }),
-        });
+        const response = await fetch(
+          `http://localhost:3002/api/v1/posts?user_id=${userId}`,
+          {
+            method: "POST",
+            body: params,
+          }
+        );
+
+        if (response.status === 200) {
+          this.successMessage = "Posts created successfully!";
+        }
+        return response;
+      } catch (error) {
+        console.error("Error creating posts:", error);
+        throw error;
+      }
+    },
+    async downloadPosts() {
+      try {
+        const response = await fetch(
+          `http://localhost:3002/api/v1/posts/download_csv`,
+          {
+            method: "GET",
+          }
+        );
+        return response;
+      } catch (error) {
+        console.error("Error downloading post:", error);
+        throw error;
+      }
+    },
+    async createPost(params) {
+      const userId = this.getCurrentUserId();
+      try {
+        const response = await fetch(
+          `http://localhost:3002/api/v1/posts?user_id=${userId}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ post: params }),
+          }
+        );
         if (response.status === 200) {
           this.successMessage = "Post created successfully!";
         }
@@ -51,9 +103,13 @@ export const usePostsStore = defineStore("posts", {
         throw error;
       }
     },
+    setPost(post) {
+      this.post = post;
+    },
     async updatePost(params) {
       const postId = params["id"];
       const updatedPost = params["post"];
+
       try {
         const response = await fetch(
           `http://localhost:3002/api/v1/posts/${postId}`,
@@ -90,9 +146,6 @@ export const usePostsStore = defineStore("posts", {
             }),
           }
         );
-        if (response.status === 200) {
-          this.successMessage = "Post deleted successfully!";
-        }
         return response;
       } catch (error) {
         console.error("Error deleting post:", error);

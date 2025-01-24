@@ -1,14 +1,31 @@
 <template>
-  <div>
+  <div id="app">
     <Header />
-    <div class="d-flex container flex-column content-box">
+    <div class="d-flex container-fluid flex-column content-box">
       <div class="border-success card">
         <SubHeader title="Post List" />
-        <div v-if="state.successMsg" class="msg-box p-3 text-start">
-          {{ state.successMsg }}
+        <div
+          v-if="state.successMsg"
+          class="alert msg-box px-3 mb-2 alert-dismissible fade show"
+          role="alert"
+        >
+          <div class="row justify-content-between px-5">
+            <span>{{ state.successMsg }}</span>
+            <button
+              @click="reloadPage"
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            >
+              x
+            </button>
+          </div>
         </div>
+
         <div class="p-3">
-          <div class="row m-2">
+          <div class="row mb-2 mx-1 justify-content-end">
+            Keyword:
             <div class="col-md-3">
               <input type="text" v-model="searchText" class="form-control" />
             </div>
@@ -16,8 +33,10 @@
             <div class="btn bg-success col-md-1" @click="toCreatePage">
               Create
             </div>
-            <div class="btn bg-success col-md-1">Upload</div>
-            <div class="btn bg-success col-md-1">Download</div>
+            <div class="btn bg-success col-md-1" @click="toUpload">Upload</div>
+            <div class="btn bg-success col-md-1" @click="downloadCsv">
+              Download
+            </div>
           </div>
           <table class="table table-striped table-bordered">
             <thead>
@@ -105,19 +124,21 @@
                               <tr>
                                 <td><b>Created User</b></td>
                                 <td class="text-danger">
-                                  {{ state.selectedPost.user_name }}
+                                  {{ state.createUser }}
                                 </td>
                               </tr>
                               <tr>
                                 <td><b>Updated Date</b></td>
                                 <td class="text-danger">
-                                  {{ state.selectedPost.updated_at }}
+                                  {{
+                                    formatDate(state.selectedPost.updated_at)
+                                  }}
                                 </td>
                               </tr>
                               <tr>
                                 <td><b>Updated User</b></td>
                                 <td class="text-danger">
-                                  {{ state.selectedPost.user_name }}
+                                  {{ state.updateUser }}
                                 </td>
                               </tr>
                             </tbody>
@@ -137,7 +158,9 @@
                   </div>
                 </td>
                 <td>{{ post.description }}</td>
-                <td>{{ post.create_user_id }}</td>
+                <td>
+                  {{ post.create_user["name"] }}
+                </td>
                 <td>{{ formatDate(post.created_at) }}</td>
                 <td>
                   <button
@@ -209,7 +232,10 @@
                               <tr>
                                 <td><b>Status</b></td>
                                 <td class="text-danger">
-                                  {{ state.selectedPost.status }}
+                                  <span v-if="state.selectedPost.status == 1">
+                                    Active
+                                  </span>
+                                  <span v-else>Inactive</span>
                                 </td>
                               </tr>
                             </tbody>
@@ -244,7 +270,7 @@
             <button
               @click="prevPage"
               class="bg-success"
-              :disabled="currentPage.value === 1"
+              :disabled="currentPage === 1"
             >
               Previous
             </button>
@@ -252,16 +278,14 @@
               v-for="page in totalPages"
               :key="page"
               @click="goToPage(page)"
-              :disabled="currentPage.value === page"
-              :class="
-                currentPage.value === page ? 'bg-dark-green' : 'bg-success'
-              "
+              :disabled="currentPage === page"
+              :class="currentPage === page ? 'bg-dark-green' : 'bg-success'"
             >
               {{ page }}
             </button>
             <button
               @click="nextPage"
-              :disabled="currentPage.value === totalPages"
+              :disabled="currentPage === totalPages"
               class="bg-success"
             >
               Next
@@ -270,6 +294,7 @@
         </div>
       </div>
     </div>
+    <Footer />
   </div>
 </template>
 
@@ -277,6 +302,7 @@
 import { ref, reactive, onMounted, computed } from "vue";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import Header from "../../Layouts/Header.vue";
+import Footer from "../../Layouts/Footer.vue";
 import { usePostsStore } from "../../../stores/posts";
 import { useRouter } from "vue-router";
 
@@ -284,23 +310,24 @@ export default {
   components: {
     SubHeader,
     Header,
+    Footer,
   },
 
   setup() {
     const postsStore = usePostsStore();
     const router = useRouter();
     const searchText = ref("");
-    const userRole = localStorage.getItem("user");
+    const itemsPerPage = 6;
+    const currentPage = ref(1);
 
     const state = reactive({
       posts: [],
-      filteredPosts: [],
+      filterPosts: [],
       successMsg: "",
       selectedPost: "",
+      createUser: "",
+      updateUser: "",
     });
-
-    const itemsPerPage = 8;
-    const currentPage = reactive({ value: 1 });
 
     onMounted(async () => {
       await fetchPosts();
@@ -308,33 +335,36 @@ export default {
 
     const fetchPosts = async () => {
       await postsStore.getPosts();
-      state.posts = postsStore.posts.filter((post) => post.deleted_at === null);
-      state.filteredPosts = state.posts;
+      state.posts = postsStore.posts;
+      state.filterPosts = state.posts;
       state.successMsg = postsStore.successMessage;
     };
 
     const totalPages = computed(() => {
-      return Math.ceil(state.posts.length / itemsPerPage);
+      return Math.ceil(state.filterPosts.length / itemsPerPage);
     });
 
     const paginatedPosts = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage;
-      return state.filteredPosts.slice(start, start + itemsPerPage);
+      return state.filterPosts.slice(start, start + itemsPerPage);
     });
 
     function setSelectedPost(post) {
       state.selectedPost = post;
+      state.createUser = post.create_user["name"];
+      state.updateUser = post.update_user["name"];
     }
 
-    function closeModal() {
+    function reloadPage() {
       location.reload();
     }
 
-    function deletePost(id) {
-      closeModal();
-
+    async function deletePost(id) {
       try {
-        const response = postsStore.deletePost(id);
+        const response = await postsStore.deletePost(id);
+        if (response.status == 200) {
+          state.successMsg = "Post deleted successfully!";
+        }
       } catch (error) {
         console.error("Error deleting post:", error);
       }
@@ -342,21 +372,36 @@ export default {
 
     function search() {
       if (!searchText.value) {
-        state.filteredPosts = state.posts;
+        state.filterPosts = state.posts;
       } else {
-        state.filteredPosts = state.posts.filter((post) => {
+        state.filterPosts = state.posts.filter((post) => {
           const titleMatch = post.title
             .toLowerCase()
             .includes(searchText.value.toLowerCase());
           const descriptionMatch = post.description
             .toLowerCase()
             .includes(searchText.value.toLowerCase());
+          const createUserMatch = post.create_user["name"]
+            .toLowerCase()
+            .includes(searchText.value.toLowerCase());
 
-          return titleMatch || descriptionMatch;
+          return titleMatch || descriptionMatch || createUserMatch;
         });
       }
     }
-
+    function nextPage() {
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
+    }
+    function goToPage(page) {
+      currentPage.value = page;
+    }
+    function prevPage() {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
+    }
     function formatDate(dateString) {
       const date = new Date(dateString);
       const year = date.getFullYear();
@@ -371,17 +416,32 @@ export default {
     function toEditPage(postId) {
       router.push({ path: `/posts/edit/${postId}` });
     }
-    function nextPage() {
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-      }
+    function toUpload() {
+      router.push({ name: "PostsUpload" });
     }
-    function goToPage(page) {
-      currentPage.value = page;
-    }
-    function prevPage() {
-      if (currentPage.value > 1) {
-        currentPage.value--;
+    async function downloadCsv() {
+      try {
+        const response = await postsStore.downloadPosts();
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const blob = await response.blob();
+
+        const link = document.createElement("a");
+        const url = window.URL.createObjectURL(blob);
+
+        link.href = url;
+        link.setAttribute("download", "posts.csv");
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error("Error downloading posts:", error);
+        throw error;
       }
     }
 
@@ -398,15 +458,22 @@ export default {
       toEditPage,
       setSelectedPost,
       deletePost,
-      closeModal,
       search,
       searchText,
+      reloadPage,
+      toUpload,
+      downloadCsv,
     };
   },
 };
 </script>
 
 <style scoped>
+#app {
+  position: relative;
+  min-height: 100vh;
+}
+
 .table {
   overflow: hidden;
 }
@@ -431,7 +498,8 @@ export default {
 }
 
 .msg-box {
-  background-color: rgba(0, 255, 128, 0.133);
+  background-color: rgba(145, 255, 0, 0.133);
+  color: rgb(70, 201, 0);
 }
 
 .pagination {

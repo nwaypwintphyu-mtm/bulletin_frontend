@@ -1,13 +1,10 @@
 <template>
   <div class="container-fluid">
     <div class="card w-50 m-auto mt-5 rounded shadow">
-      <nav class="bg-success text-light p-3 text-start">
-        <h6>Login</h6>
-      </nav>
+      <SubHeader title="Login" />
       <div v-if="errorMessage" class="error-box p-3 text-start">
         {{ errorMessage }}
       </div>
-
       <div class="card-body">
         <form @submit.prevent="login">
           <div class="w-75 m-auto">
@@ -61,14 +58,6 @@
                 </button>
               </div>
             </div>
-            <div class="mb-4 row">
-              <div class="col-sm-3"></div>
-              <div class="col-sm-9">
-                <router-link to="/register" class="text-decoration-none">
-                  Create account? <i class="fa fa-user"></i>
-                </router-link>
-              </div>
-            </div>
           </div>
         </form>
       </div>
@@ -79,14 +68,21 @@
 <script>
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useUsersStore } from "../../stores/users";
+import SubHeader from "../Layouts/SubHeader.vue";
 
 export default {
+  components: {
+    SubHeader,
+  },
   setup() {
     const email = ref("");
+    const current_user = ref(null);
     const password = ref("");
     const errorMessage = ref("");
     const router = useRouter();
     const rememberMe = ref(false);
+    const usersStore = useUsersStore();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const state = reactive({
@@ -100,6 +96,7 @@ export default {
     onMounted(() => {
       const savedEmail = localStorage.getItem("savedEmail");
       const savedPassword = localStorage.getItem("savedPassword");
+      current_user.value = useUsersStore.current_user;
 
       if (savedEmail && savedPassword) {
         email.value = savedEmail;
@@ -120,29 +117,16 @@ export default {
       if (!password.value) {
         state.passwordError = "Password can't be blank";
       }
+      if (!state.emailError && !state.passwordError) {
+        const params = {
+          email: email.value,
+          password: password.value,
+        };
+        const response = await usersStore.userLogin(params);
 
-      if (state.emailError || state.passwordError) {
-        return;
-      }
-
-      try {
-        const response = await fetch("http://localhost:3002/api/v1/sessions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email.value,
-            password: password.value,
-          }),
-        });
-
-        if (response.status === 200) {
-          const data = await response.json();
-          const user = data.user;
-
-          localStorage.setItem("user", JSON.stringify(user));
-
+        if (response && response.error) {
+          errorMessage.value = response.error;
+        } else if (response && response.user) {
           if (rememberMe.value) {
             localStorage.setItem("savedEmail", email.value);
             localStorage.setItem("savedPassword", password.value);
@@ -150,21 +134,11 @@ export default {
             localStorage.removeItem("savedEmail");
             localStorage.removeItem("savedPassword");
           }
+
           router.push({ path: "/posts" });
         } else {
-          const data = await response.json();
-          if (response.status === 404) {
-            errorMessage.value = data.error || "Email doesn't exist.";
-          } else if (response.status === 401) {
-            errorMessage.value = data.error || "Incorrect password.";
-          } else {
-            state.value.notMatchError =
-              data.error || "Login failed. Please try again.";
-          }
-          errorMessage.value = data.error;
+          errorMessage.value = "An unexpected error occurred.";
         }
-      } catch (error) {
-        errorMessage.value = "An error occurred. Please try again.";
       }
     }
 
@@ -188,4 +162,5 @@ export default {
   background-color: rgba(255, 0, 0, 0.133);
   color: rgb(201, 0, 0);
 }
+
 </style>
