@@ -94,6 +94,7 @@ const routes = [
     path: "/user/register/confirm",
     name: "RegisterConfirm",
     component: RegisterConfirm,
+    meta: { requiresAuth: true },
   },
   {
     path: "/reset-password/:token",
@@ -109,7 +110,7 @@ const router = createRouter({
 });
 
 // user auth
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, next) => {
   const usersStore = useUsersStore();
   const isAuthenticated = usersStore.current_user !== null;
   if (

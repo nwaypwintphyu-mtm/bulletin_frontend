@@ -161,7 +161,7 @@ export default {
     const password = ref("");
     const confirm_password = ref("");
     const phone = ref("");
-    const dob = ref(null);
+    const dob = ref(new Date());
     const address = ref("");
     const profile = ref(null);
     const confirm_profile = ref("");
@@ -176,7 +176,6 @@ export default {
       confirm_password.value = usersStore.confirm_password;
       role.value = usersStore.role;
       phone.value = usersStore.phone;
-      dob.value = usersStore.dob;
       address.value = usersStore.address;
       profile.value = usersStore.profile;
       confirm_profile.value = usersStore.confirm_profile;

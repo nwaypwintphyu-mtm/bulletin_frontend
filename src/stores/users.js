@@ -75,6 +75,7 @@ export const useUsersStore = defineStore("user", {
             method: "DELETE",
           }
         );
+        sessionStorage.removeItem("current_user");
         return {
           status: response.status,
         };
