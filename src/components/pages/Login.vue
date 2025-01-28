@@ -69,6 +69,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUsersStore } from "../../stores/users";
+import { useToast } from "vue-toast-notification";
 import SubHeader from "../Layouts/SubHeader.vue";
 
 export default {
@@ -84,16 +85,17 @@ export default {
     const rememberMe = ref(false);
     const usersStore = useUsersStore();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const toast = useToast();
 
     const state = reactive({
       emailError: "",
       emailFomatError: "",
       passwordError: "",
-      allFieldError: "",
       emailNotMatchError: "",
     });
 
     onMounted(() => {
+      //if remembered checked auto filled email and password
       const savedEmail = localStorage.getItem("savedEmail");
       const savedPassword = localStorage.getItem("savedPassword");
       current_user.value = useUsersStore.current_user;
@@ -104,40 +106,51 @@ export default {
         rememberMe.value = true;
       }
     });
+
+    //show error
+    const showErrorToast = () => {
+      toast.error("Login failed! Please try again..", {
+        duration: 5000,
+      });
+    };
+
+    //login
     async function login() {
       state.emailError = "";
       state.passwordError = "";
-      state.allFieldError = "";
 
       if (!email.value) {
         state.emailError = "Email can't be blank";
       } else if (!emailPattern.test(email.value)) {
         state.emailError = "Email format is invalid";
       }
+
       if (!password.value) {
         state.passwordError = "Password can't be blank";
       }
+      
       if (!state.emailError && !state.passwordError) {
         const params = {
           email: email.value,
           password: password.value,
         };
-        const response = await usersStore.userLogin(params);
+        try {
+          const response = await usersStore.userLogin(params);
 
-        if (response && response.error) {
-          errorMessage.value = response.error;
-        } else if (response && response.user) {
-          if (rememberMe.value) {
-            localStorage.setItem("savedEmail", email.value);
-            localStorage.setItem("savedPassword", password.value);
+          if (response.status === 200) {
+            if (rememberMe.value) {
+              localStorage.setItem("savedEmail", email.value);
+              localStorage.setItem("savedPasswrod", password.value);
+            } else {
+              localStorage.removeItem("savedEmail");
+              localStorage.removeItem("savedPassword");
+            }
+            router.push({ path: "/posts" });
           } else {
-            localStorage.removeItem("savedEmail");
-            localStorage.removeItem("savedPassword");
+            errorMessage.value = "Incorrect email or password!";
           }
-
-          router.push({ path: "/posts" });
-        } else {
-          errorMessage.value = "An unexpected error occurred.";
+        } catch (error) {
+          showErrorToast();
         }
       }
     }
@@ -149,6 +162,7 @@ export default {
       state,
       rememberMe,
       errorMessage,
+      showErrorToast,
     };
   },
 };
@@ -162,5 +176,4 @@ export default {
   background-color: rgba(255, 0, 0, 0.133);
   color: rgb(201, 0, 0);
 }
-
 </style>

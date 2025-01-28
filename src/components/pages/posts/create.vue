@@ -8,12 +8,6 @@
         <div class="p-3">
           <form @submit.prevent="toCreateConfirm">
             <div class="w-75 m-auto">
-              <div
-                v-if="duplicateNameError"
-                class="text-center error-box p-2 rounded w-100 text-danger my-2"
-              >
-                {{ duplicateNameError }}
-              </div>
               <div class="mb-4 m-auto row">
                 <label
                   for="title"
@@ -75,30 +69,41 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import SubHeader from "../../Layouts/SubHeader.vue";
-import Header from "../../Layouts/Header.vue";
-import Footer from "../../Layouts/Footer.vue";
-
+import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { usePostsStore } from "../../../stores/posts";
+import Header from "../../Layouts/Header.vue";
+import SubHeader from "../../Layouts/SubHeader.vue";
+import Footer from "../../Layouts/Footer.vue";
 import Button from "../../compos/Button.vue";
 
 export default {
   components: {
+    Header,
     SubHeader,
     Button,
-    Header,
     Footer,
   },
 
   setup() {
+    const postsStore = usePostsStore();
     const router = useRouter();
     const title = ref("");
     const description = ref("");
     const titleError = ref("");
     const descriptionError = ref("");
-    const duplicateNameError = ref("");
 
+    onMounted(() => {
+      //showing post input value when click back button from confirm page
+      title.value = postsStore.post.title;
+      description.value = postsStore.post.description;
+    });
+
+    const state = reactive({
+      post: [],
+    });
+
+    //go to create confirm page
     function toCreateConfirm() {
       titleError.value = "";
       descriptionError.value = "";
@@ -112,17 +117,21 @@ export default {
         descriptionError.value = "255 characters is the maixmun allowed!";
       }
       if (title.value && description.value) {
-        const params = {
-          title: title.value,
-          description: description.value,
-        };
-        router.push({ path: "/posts/create/confirm", query: params });
+        //set values to state.post to store in postsStore
+        state.post.title = title.value;
+        state.post.description = description.value;
+
+        //set post in store to call from edit confirm page
+        postsStore.setPost(state.post);
+        router.push({ path: "/posts/create/confirm" });
       }
     }
 
+    //reset form values
     const clearForm = () => {
       title.value = "";
       description.value = "";
+
       titleError.value = "";
       descriptionError.value = "";
     };
@@ -132,9 +141,9 @@ export default {
       titleError,
       description,
       descriptionError,
-      duplicateNameError,
       toCreateConfirm,
       clearForm,
+      state,
     };
   },
 };
@@ -161,9 +170,5 @@ label {
   content: "*";
   color: red;
   margin-left: 4px;
-}
-.error-box {
-  border: 1px solid rgba(255, 0, 0, 0.43);
-  background-color: rgba(255, 0, 0, 0.04);
 }
 </style>

@@ -130,9 +130,7 @@
               <div class="col-8">
                 <button type="submit" class="btn bg-success">Register</button
                 >&nbsp;
-                <button @click="clearForm" class="btn bg-secondary">
-                  Clear
-                </button>
+                <button type="reset" class="btn bg-secondary">Clear</button>
               </div>
             </div>
           </div>
@@ -144,13 +142,12 @@
 
 <script>
 import { onMounted, reactive, ref } from "vue";
+import { useUsersStore } from "../../../stores/users";
+import { useRouter } from "vue-router";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import DatePicker from "../../compos/DatePicker.vue";
 import FileUpload from "../../compos/FileUpload.vue";
 import Button from "../../compos/Button.vue";
-import { useUsersStore } from "../../../stores/users";
-import { useRouter } from "vue-router";
-
 export default {
   components: {
     SubHeader,
@@ -164,7 +161,7 @@ export default {
     const password = ref("");
     const confirm_password = ref("");
     const phone = ref("");
-    const dob = ref(new Date());
+    const dob = ref(null);
     const address = ref("");
     const profile = ref(null);
     const confirm_profile = ref("");
@@ -172,7 +169,18 @@ export default {
     const usersStore = useUsersStore();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    onMounted(() => {});
+    onMounted(() => {
+      name.value = usersStore.name;
+      email.value = usersStore.email;
+      password.value = usersStore.password;
+      confirm_password.value = usersStore.confirm_password;
+      role.value = usersStore.role;
+      phone.value = usersStore.phone;
+      dob.value = usersStore.dob;
+      address.value = usersStore.address;
+      profile.value = usersStore.profile;
+      confirm_profile.value = usersStore.confirm_profile;
+    });
 
     const state = reactive({
       nameError: "",
@@ -185,9 +193,12 @@ export default {
       passwordMatchError: "",
     });
 
+    //get date from datepicker component
     function getDate(date) {
       dob.value = date;
     }
+
+    //get file from fileupload component
     function onFileSelected(file) {
       if (file) {
         profile.value = file;
@@ -197,17 +208,8 @@ export default {
         confirm_profile.value = "";
       }
     }
-    const clearForm = () => {
-      name.value = "";
-      email.value = "";
-      password.value = "";
-      confirm_password.value = "";
-      phone.value = "";
-      dob.value = "";
-      address.value = "";
-      profile.value = "";
-    };
 
+    //go to register confirm page
     function toRegisterConfirm() {
       state.nameError = "";
       state.emailError = "";
@@ -262,14 +264,14 @@ export default {
           confirm_profile: confirm_profile.value,
         };
 
+        //set user data into store to call from confirm page
         usersStore.setUserData(params);
-
+        //go to confirm page
         router.push({ name: "RegisterConfirm" });
       }
     }
 
     return {
-      clearForm,
       toRegisterConfirm,
       email,
       name,
@@ -279,6 +281,7 @@ export default {
       getDate,
       address,
       onFileSelected,
+      dob,
       state,
     };
   },

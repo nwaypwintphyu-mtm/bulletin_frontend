@@ -35,11 +35,13 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from "vue";
-import SubHeader from "../../Layouts/SubHeader.vue";
+import { reactive } from "vue";
 import { usePostsStore } from "../../../stores/posts";
-import Button from "../../compos/Button.vue";
 import { useRouter } from "vue-router";
+import { useToast } from "vue-toast-notification";
+import SubHeader from "../../Layouts/SubHeader.vue";
+import Button from "../../compos/Button.vue";
+
 export default {
   components: {
     SubHeader,
@@ -47,20 +49,28 @@ export default {
   },
   setup() {
     const postsStore = usePostsStore();
+    const toast = useToast();
     const router = useRouter();
-    onMounted(() => {});
     const allowedTypes = ["text/csv"];
 
     const state = reactive({
       file: "",
       fileError: "",
-      successMessage: "",
     });
+
+    //get file on change
     function onFileChange(event) {
       const file = event.target.files[0];
       state.file = file;
     }
 
+    const showErrorToast = (toastMessage) => {
+      toast.error(toastMessage, {
+        duration: 5000,
+      });
+    };
+
+    //upload posts csv
     async function upload() {
       state.fileError = "";
 
@@ -76,42 +86,47 @@ export default {
 
       const reader = new FileReader();
 
+      //read csv fil
       reader.onload = async () => {
         const fileContent = reader.result;
+        //get rows
         const rows = fileContent.split("\n").filter((row) => row.trim() !== "");
+
+        //get columns
         const columns = rows.map((row) => row.split(","));
 
-        const rowLimit = rows.length;
+        //column limit
         const columnLimit = columns[0].length;
 
+        //if col > 3 show error
         if (columnLimit > 3) {
           state.fileError = "Post upload csv must have 3 columns.";
-          return;
-        }
-        if (rowLimit > 100) {
-          state.fileError = "Maximun 100 posts are allowed to create.";
           return;
         }
 
         if (!state.fileError) {
           const formData = new FormData();
           formData.append("posts", state.file);
-
           try {
             const response = await postsStore.uploadPost(formData);
             if (response.status === 200) {
-              router.push({name:"Posts"})
+              router.push({ name: "Posts" });
+            } else {
+              showErrorToast(
+                "Failed to upload post with csv! Please try again..."
+              );
             }
           } catch (error) {
-            console.error("Error during upload:", error);
-            state.fileError = "Error uploading the file.";
+            showErrorToast(
+              "Failed to upload post with csv! Please try again..."
+            );
           }
         }
       };
-
       reader.onerror = () => {
         state.fileError = "Error reading the file.";
       };
+      //set file into state.file
       reader.readAsText(state.file);
     }
 

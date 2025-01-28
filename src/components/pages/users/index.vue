@@ -120,7 +120,7 @@
                       class="modal-dialog modal-dialog-centered"
                       role="document"
                     >
-                      <div class="modal-content">
+                      <div class="modal-content p-3">
                         <div class="modal-header">
                           <h6
                             class="modal-title col-md-11"
@@ -206,7 +206,7 @@
                                 <tr>
                                   <td><b>Created User</b></td>
                                   <td class="">
-                                    {{ state.selectedUser.create_user_id }}
+                                    {{ state.selectedUser.create_user_name }}
                                   </td>
                                 </tr>
                                 <tr>
@@ -241,11 +241,11 @@
                   </div>
                 </td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.create_user_id }}</td>
+                <td>{{ user.create_user_name }}</td>
                 <td v-if="user.role == 0">Admin</td>
                 <td v-else>User</td>
                 <td>{{ user.phone }}</td>
-                <td>{{ user.dob }}</td>
+                <td>{{ formatDate(user.dob) }}</td>
                 <td>{{ user.address }}</td>
                 <td>{{ formatDate(user.created_at) }}</td>
                 <td>{{ formatDate(user.updated_at) }}</td>
@@ -328,7 +328,7 @@
                               <tr>
                                 <td><b>Date of Birth</b></td>
                                 <td class="text-danger">
-                                  {{ state.selectedUser.dob }}
+                                  {{ formatDate(state.selectedUser.dob) }}
                                 </td>
                               </tr>
                               <tr>
@@ -400,11 +400,12 @@
 
 <script>
 import { reactive, onMounted, ref, computed } from "vue";
+import { useUsersStore } from "../../../stores/users";
+import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import Header from "../../Layouts/Header.vue";
 import Footer from "../../Layouts/Footer.vue";
 import DatePicker from "../../compos/DatePicker.vue";
-import { useUsersStore } from "../../../stores/users";
 
 export default {
   components: {
@@ -422,6 +423,7 @@ export default {
     const toDate = ref(null);
     const itemsPerPage = 6;
     const currentPage = ref(1);
+    const toast = useToast();
 
     const state = reactive({
       users: [],
@@ -437,6 +439,7 @@ export default {
       state.successMsg = usersStore.successMessage;
     });
 
+    //formatting date like yy/mm/dd
     function formatDate(dateString) {
       const date = new Date(dateString);
       const year = date.getFullYear();
@@ -444,36 +447,49 @@ export default {
       const day = String(date.getDate()).padStart(2, "0");
       return `${year}/${month}/${day}`;
     }
+
+    //get from date from datepicker
     const getFromDate = (date) => {
       fromDate.value = date;
     };
+
+    //get to date from datepicker
     const getToDate = (date) => {
       toDate.value = date;
     };
+
+    //totalpages for pagination
     const totalPages = computed(() => {
       return Math.ceil(state.filterUsers.length / itemsPerPage);
     });
 
+    //users in one page
     const paginatedUsers = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage;
       return state.filterUsers.slice(start, start + itemsPerPage);
     });
 
+    //go to prev page in pagination
     function prevPage() {
       if (currentPage.value > 1) {
         currentPage.value--;
       }
     }
+
+    //go to next page in pagination
     function nextPage() {
       if (currentPage.value < totalPages.value) {
         currentPage.value++;
       }
     }
+
+    //number button in pagination
     const gotoPage = (page) => {
       currentPage.value = page;
     };
 
-    const search = () => {
+    //filtered users
+    function search() {
       if (
         !nameSearch.value &&
         !emailSearch.value &&
@@ -483,57 +499,70 @@ export default {
         state.filterUsers = state.users;
       } else {
         state.filterUsers = state.users.filter((user) => {
-          let isMatch = true;
+          const nameMatch = nameSearch.value
+            ? user.name.toLowerCase().includes(nameSearch.value.toLowerCase())
+            : true;
 
-          if (nameSearch.value) {
-            isMatch =
-              isMatch &&
-              user.name.toLowerCase().includes(nameSearch.value.toLowerCase());
-          }
+          const emailMatch = emailSearch.value
+            ? user.email.toLowerCase().includes(emailSearch.value.toLowerCase())
+            : true;
 
-          if (emailSearch.value) {
-            isMatch =
-              isMatch &&
-              user.email
-                .toLowerCase()
-                .includes(emailSearch.value.toLowerCase());
-          }
+          const fromDateMatch = fromDate.value
+            ? new Date(user.created_at) >= new Date(fromDate.value)
+            : true;
 
-          if (fromDate.value) {
-            isMatch =
-              isMatch && new Date(user.created_at) >= new Date(fromDate.value);
-          }
-          if (toDate.value) {
-            isMatch =
-              isMatch && new Date(user.created_at) <= new Date(toDate.value);
-          }
-
-          return isMatch;
+          const toDateMatch = toDate.value
+            ? new Date(user.created_at) <= new Date(toDate.value)
+            : true;
+          //filter users according to name , emial, from , to matches
+          return nameMatch && emailMatch && fromDateMatch && toDateMatch;
         });
       }
-    };
+    }
 
+    //set selected user for delete user modal
     function setSelectedUser(selectedUser) {
       state.selectedUser = selectedUser;
-      // state.createUser = user.user["name"];
     }
+
+    //reload page no to show deleted users after deletion
     function reloadPage() {
       location.reload();
     }
+
+    //show error
+    const showErrorToast = (toastMessage) => {
+      toast.error(toastMessage, {
+        duration: 5000,
+      });
+    };
+
+    //delete user according to id
     async function deleteUser(id) {
       try {
         const response = await usersStore.deleteUser(id);
-        if (response.status == 200) {
-          state.deleteSuccessMsg = "User deleted successfully!";
+        if (response.status === 200) {
+          state.deleteSuccessMsg = response.message;
+        } else {
+          showErrorToast("Failed to delete user! Please try again...");
         }
       } catch (error) {
-        console.error("Error deleting post:", error);
+        showErrorToast("Failed to delete user! Please try again...");
       }
     }
 
+    //get users
     const fetchUsers = async () => {
-      await usersStore.getUsers();
-      state.users = usersStore.users;
+      try {
+        const response = await usersStore.getUsers();
+        if (response.status === 200) {
+          state.users = usersStore.users;
+        } else {
+          showErrorToast("Failed to load users! Please try again...");
+        }
+      } catch (error) {
+        showErrorToast("Failed to load users! Please try again...");
+      }
     };
 
     return {
@@ -555,6 +584,7 @@ export default {
       prevPage,
       nextPage,
       gotoPage,
+      showErrorToast,
     };
   },
 };

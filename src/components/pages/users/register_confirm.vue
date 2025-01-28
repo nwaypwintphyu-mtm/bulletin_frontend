@@ -2,6 +2,24 @@
   <div class="container-fluid">
     <div class="card w-50 m-auto mt-5 rounded shadow">
       <SubHeader title="Register Confirm" />
+      <div
+        v-if="duplicateError"
+        class="alert msg-box px-3 mb-2 alert-dismissible fade show"
+        role="alert"
+      >
+        <div class="row justify-content-between px-5">
+          <span>{{ duplicateError }}</span>
+          <button
+            @click="reloadPage"
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          >
+            x
+          </button>
+        </div>
+      </div>
       <Button label="Back" route="/register" />
       <div class="card-body">
         <form @submit.prevent="Register" enctype="multipart/form-data">
@@ -11,10 +29,7 @@
                 >Name</label
               >
               <div class="col-8">
-                <input id="name" class="form-control" v-model="name" />
-                <div v-if="state.nameError" class="text-danger mt-1">
-                  {{ state.nameError }}
-                </div>
+                <input id="name" class="form-control" v-model="name" readonly />
               </div>
             </div>
             <div class="mb-4 row">
@@ -22,10 +37,12 @@
                 >E-Mail Address</label
               >
               <div class="col-8">
-                <input id="email" class="form-control" v-model="email" />
-                <div v-if="state.emailError" class="text-danger mt-1">
-                  {{ state.emailError }}
-                </div>
+                <input
+                  id="email"
+                  class="form-control"
+                  v-model="email"
+                  readonly
+                />
               </div>
             </div>
             <div class="mb-4 row">
@@ -34,14 +51,11 @@
               >
               <div class="col-8">
                 <input
-                  type="password"
                   id="password"
                   class="form-control"
                   v-model="password"
+                  readonly
                 />
-                <div v-if="state.passwordError" class="text-danger mt-1">
-                  {{ state.passwordError }}
-                </div>
               </div>
             </div>
             <div class="mb-4 row">
@@ -52,43 +66,36 @@
               >
               <div class="col-8">
                 <input
-                  type="password"
                   id="confirm_password"
                   class="form-control"
                   v-model="confirm_password"
+                  readonly
                 />
-                <div
-                  v-if="state.confirm_passwordError"
-                  class="text-danger mt-1"
-                >
-                  {{ state.confirm_passwordError }}
-                </div>
               </div>
             </div>
             <div class="mb-4 row">
               <label for="role" class="col-4 col-form-label">Type</label>
               <div class="col-8">
-                <select
-                  name="role"
-                  id="role"
+                <input
+                  v-if="(role = 0)"
+                  id="confirm_password"
                   class="form-control"
-                  aria-label="Select role"
-                  v-model="role"
-                >
-                  <option value="0">Admin</option>
-                  <option value="1">User</option>
-                </select>
+                  value="Admin"
+                  readonly
+                />
+                <input
+                  v-else
+                  id="confirm_password"
+                  class="form-control"
+                  value="User"
+                  readonly
+                />
               </div>
             </div>
             <div class="mb-4 row">
               <label for="phone" class="col-4 col-form-label">Phone</label>
               <div class="col-8">
-                <input
-                  type=""
-                  id="phone"
-                  class="form-control"
-                  v-model="phone"
-                />
+                <input class="form-control" v-model="phone" readonly />
               </div>
             </div>
             <div class="mb-4 row">
@@ -96,7 +103,7 @@
                 >Date of birth</label
               >
               <div class="col-8">
-                <DatePicker @date-selected="getDate" />
+                <input class="form-control" v-model="dob" readonly />
               </div>
             </div>
             <div class="mb-4 row">
@@ -107,6 +114,7 @@
                   id="address"
                   class="form-control"
                   v-model="address"
+                  readonly
                 />
               </div>
             </div>
@@ -148,12 +156,13 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from "vue";
-import SubHeader from "../../Layouts/SubHeader.vue";
-import DatePicker from "../../compos/DatePicker.vue";
+import { onMounted, ref } from "vue";
 import { useUsersStore } from "../../../stores/users";
 import { useRouter } from "vue-router";
 import Button from "../../compos/Button.vue";
+import { useToast } from "vue-toast-notification";
+import SubHeader from "../../Layouts/SubHeader.vue";
+import DatePicker from "../../compos/DatePicker.vue";
 
 export default {
   components: {
@@ -171,10 +180,11 @@ export default {
     const address = ref("");
     const confirm_profile = ref(null);
     const profile = ref("");
-    const role = ref(1);
+    const role = ref(0);
     const router = useRouter();
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const usersStore = useUsersStore();
+    const toast = useToast();
+    const duplicateError = ref("");
 
     onMounted(() => {
       name.value = usersStore.name;
@@ -183,79 +193,54 @@ export default {
       confirm_password.value = usersStore.confirm_password;
       role.value = usersStore.role;
       phone.value = usersStore.phone;
-      dob.value = usersStore.dob;
+      dob.value = formatDate(usersStore.dob);
       address.value = usersStore.address;
       profile.value = usersStore.profile;
       confirm_profile.value = usersStore.confirm_profile;
     });
 
-    const state = reactive({
-      nameError: "",
-      emailError: "",
-      passwordError: "",
-      confirm_passwordError: "",
-      phoneError: "",
-      dobError: "",
-      addressError: "",
-      profileError: "",
-    });
-
-    function getDate(date) {
-      dob.value = date;
+    //format date yy/mm/dd
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}/${month}/${day}`;
     }
 
+    //go to register page
     function toRegister() {
       router.push({ name: "Register" });
     }
+    const showErrorToast = () => {
+      toast.error("Failed to register user! Please try again...", {
+        duration: 5000,
+      });
+    };
 
+    //register user
     async function Register() {
-      state.nameError = "";
-      state.emailError = "";
-      state.passwordError = "";
-      state.confirm_passwordError = "";
-      state.profileError = "";
-      if (!name.value) {
-        state.nameError = "Name can't be blank.";
-      }
-      if (!email.value) {
-        state.emailError = "Email can't be blank.";
-      } else if (!emailPattern.test(email.value)) {
-        state.emailError = "Email format is invalid";
-      }
-      if (!password.value) {
-        state.passwordError = "Password can't be blank.";
-      }
-      if (!confirm_password.value) {
-        state.confirm_passwordError = "Confirm password can't be blank.";
-      }
-      if (!profile.value) {
-        state.profileError = "Profile can't be blank.";
-      }
-      if (
-        !state.nameError &&
-        !state.emailError &&
-        !state.passwordError &&
-        !state.confirm_passwordError &&
-        !state.profileError
-      ) {
-        const formData = new FormData();
+      const formData = new FormData();
 
-        formData.append("user[name]", name.value);
-        formData.append("user[email]", email.value);
-        formData.append("user[password]", password.value);
-        formData.append("user[role]", role.value);
-        formData.append("user[phone]", phone.value);
-        formData.append("user[dob]", dob.value);
-        formData.append("user[address]", address.value);
-        formData.append("user[profile]", profile.value);
-        try {
-          const response = await usersStore.setUsers(formData);
-          if (response.status === 201) {
-            router.push({ name: "Users" });
-          }
-        } catch (error) {
-          console.error("Error updating user:", error);
+      formData.append("user[name]", name.value);
+      formData.append("user[email]", email.value);
+      formData.append("user[password]", password.value);
+      formData.append("user[role]", role.value);
+      formData.append("user[phone]", phone.value);
+      formData.append("user[dob]", dob.value);
+      formData.append("user[address]", address.value);
+      formData.append("user[profile]", profile.value);
+      try {
+        const response = await usersStore.setUsers(formData);
+        if (response.status === 201) {
+          router.push({ name: "Users" });
+        } else if (response.status === 422) {
+          duplicateError.value = "Email already exists!";
+        }else if (response.status === 500) {
+          duplicateError.value = "Name already exists!";
         }
+      } catch (error) {
+        showErrorToast();
       }
     }
 
@@ -267,11 +252,13 @@ export default {
       confirm_password,
       role,
       phone,
-      getDate,
       address,
-      state,
       confirm_profile,
       toRegister,
+      dob,
+      formatDate,
+      showErrorToast,
+      duplicateError,
     };
   },
 };
@@ -284,5 +271,10 @@ export default {
 .required::after {
   content: " *";
   color: red;
+}
+
+.msg-box {
+  background-color: rgba(255, 0, 0, 0.133);
+  color: rgb(201, 0, 0);
 }
 </style>

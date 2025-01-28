@@ -4,8 +4,8 @@
     <button
       class="navbar-toggler"
       type="button"
-      data-toggle="collapse"
-      data-target="#navbarSupportedContent"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent"
       aria-expanded="false"
       aria-label="Toggle navigation"
@@ -36,17 +36,22 @@
               href="#"
               id="navbarDropdown"
               role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
+              data-bs-toggle="dropdown"
               aria-expanded="false"
             >
               {{ user ? user.name : "" }}
               <i class="fa fa-user"></i>
             </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <button class="dropdown-item" @click="toProfile">Profile</button>
-              <button class="dropdown-item" @click="logout">Logout</button>
-            </div>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li>
+                <button class="dropdown-item" @click="toProfile">
+                  Profile
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item" @click="logout">Logout</button>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -58,12 +63,14 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useUsersStore } from "../../stores/users";
+import { useToast } from "vue-toast-notification";
 
 export default {
   setup() {
     const router = useRouter();
     const user = ref(null);
     const usersStore = useUsersStore();
+    const toast = useToast();
 
     onMounted(() => {
       const savedUser = usersStore.current_user;
@@ -80,25 +87,33 @@ export default {
       router.push({ name: "Users" });
     };
 
-    async function logout() {
-      const userId = user.value.id;
+    const showErrorToast = () => {
+      toast.error("Logout failed! Please try again...", {
+        duration: 5000,
+      });
+    };
+
+    const logout = async () => {
       try {
+        const userId = user.value.id;
         const response = await usersStore.userLogout(userId);
         if (response.status === 200) {
           router.push({ name: "Login" });
+        } else {
+          showErrorToast();
         }
       } catch (error) {
-        console.error("Network error:", error);
+        showErrorToast();
       }
-    }
+    };
 
-    function toProfile() {
+    const toProfile = () => {
       router.push({ name: "UserProfile" });
-    }
+    };
 
-    function toCreateUser() {
+    const toCreateUser = () => {
       router.push({ name: "Register" });
-    }
+    };
 
     return {
       user,
@@ -106,7 +121,8 @@ export default {
       toPost,
       toUser,
       toProfile,
-      toCreateUser
+      toCreateUser,
+      showErrorToast,
     };
   },
 };

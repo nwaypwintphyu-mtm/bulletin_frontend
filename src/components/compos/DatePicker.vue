@@ -11,9 +11,8 @@ import Datepicker from "vuejs3-datepicker";
 import moment from "moment";
 
 export default {
-  name: "CustomDatepicker",
+  name: "DatePicker",
   components: { Datepicker },
-
   emits: ["date-selected"],
 
   setup(props, context) {
@@ -21,11 +20,11 @@ export default {
 
     watch(selectedDate, (newDate) => {
       const formattedDate = moment(newDate).format("YYYY-MM-DD");
-      context.emit("date-selected", formattedDate); 
+      context.emit("date-selected", formattedDate);
     });
-    return{
-      selectedDate
-    }
+    return {
+      selectedDate,
+    };
   },
 };
 </script>

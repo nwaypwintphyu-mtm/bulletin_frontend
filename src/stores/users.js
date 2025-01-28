@@ -2,9 +2,9 @@ import { defineStore } from "pinia";
 
 export const useUsersStore = defineStore("user", {
   state: () => {
-    const currentUserData = sessionStorage.getItem("current_user");
+    const currentUserData = sessionStorage.getItem("current_user"); //initialize currentUserData
     return {
-      current_user: currentUserData ? JSON.parse(currentUserData) : null,
+      current_user: currentUserData ? JSON.parse(currentUserData) : null, //set current user
       users: [],
       name: "",
       email: "",
@@ -20,7 +20,7 @@ export const useUsersStore = defineStore("user", {
     };
   },
   actions: {
-    // to pass to confirm page
+    //set user for confirmpage
     setUserData(data) {
       this.name = data.name;
       this.email = data.email;
@@ -34,6 +34,7 @@ export const useUsersStore = defineStore("user", {
       this.confirm_profile = data.confirm_profile;
     },
 
+    //user login
     async userLogin(params) {
       try {
         const response = await fetch("http://localhost:3002/api/v1/sessions", {
@@ -45,23 +46,27 @@ export const useUsersStore = defineStore("user", {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Login failed");
+          return {
+            status: response.status,
+            data: null,
+          };
         }
-
         const data = await response.json();
         this.current_user = data.user;
         sessionStorage.setItem(
           "current_user",
           JSON.stringify(this.current_user)
-        ); // store user in sessionStorage
-        return data;
+        );
+        return {
+          status: response.status,
+          data: data,
+        };
       } catch (error) {
-        console.error("Login failed:", error);
-        return { error: error.message };
+        return;
       }
     },
 
+    //user logout
     async userLogout(userId) {
       try {
         const response = await fetch(
@@ -70,17 +75,15 @@ export const useUsersStore = defineStore("user", {
             method: "DELETE",
           }
         );
-
-        if (response.status === 200) {
-          sessionStorage.removeItem("current_user"); // remove user from sessionStorage
-          this.current_user = null; // set store state to null
-        }
-        return response;
+        return {
+          status: response.status,
+        };
       } catch (error) {
-        console.error("Network error:", error);
+        return;
       }
     },
 
+    //get all users
     async getUsers() {
       const userId = this.current_user.id;
       try {
@@ -92,16 +95,23 @@ export const useUsersStore = defineStore("user", {
         );
 
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          return {
+            status: response.status,
+            data: null,
+          };
         }
-
         const data = await response.json();
         this.users = data;
+        return {
+          status: response.status,
+          data: data,
+        };
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        return;
       }
     },
 
+    //create user
     async setUsers(params) {
       try {
         const response = await fetch(
@@ -113,19 +123,20 @@ export const useUsersStore = defineStore("user", {
         );
 
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          return {
+            status: response.status,
+          };
         }
-
-        if (response.status === 201) {
-          this.successMessage = "User Registered Successfully";
-        }
-
-        return response;
+        this.successMessage = "User Registered Successfully.";
+        return {
+          status: response.status,
+        };
       } catch (error) {
-        console.error("Failed to fetch users:", error);
+        return;
       }
     },
 
+    //delete user
     async deleteUser(id) {
       try {
         const response = await fetch(
@@ -137,18 +148,21 @@ export const useUsersStore = defineStore("user", {
             },
           }
         );
-
-        if (response.status === 200) {
-          // this.successMessage = "User Deleted Successfully";
+        if (!response.ok) {
+          return {
+            status: response.status,
+          };
         }
-
-        return response;
+        return {
+          status: response.status,
+          message: "User deleted Successfully!",
+        };
       } catch (error) {
-        console.error("Error deleting user:", error);
-        throw error;
+        return;
       }
     },
 
+    //update user
     async updateUser(params) {
       try {
         const response = await fetch(
@@ -165,16 +179,21 @@ export const useUsersStore = defineStore("user", {
           "current_user",
           JSON.stringify(this.current_user)
         );
-        if (response.status === 200) {
-          this.successMessage = "User updated successfully!";
+        if (!response.ok) {
+          return {
+            status: response.status,
+          };
         }
-        return response;
+        this.successMessage = "User updated successfully.";
+        return {
+          status: response.status,
+        };
       } catch (error) {
-        console.error("Error updating user:", error);
-        throw error;
+        return;
       }
     },
 
+    //change password
     async changePassword(params) {
       try {
         const response = await fetch(
@@ -184,27 +203,65 @@ export const useUsersStore = defineStore("user", {
             body: params,
           }
         );
-        if (response.status === 200) {
-          this.successMessage = "Password is successfully updated.";
+        if (!response.ok) {
+          return {
+            status: response.status,
+          };
         }
-        return response;
+        this.successMessage = "Change password successfully.";
+        return {
+          status: response.status,
+        };
       } catch (error) {
-        console.error("Error updating password:", error);
-        throw error;
+        return;
       }
     },
-  },
-  getters: {
-    getUserData: (state) => ({
-      name: state.name,
-      email: state.email,
-      password: state.password,
-      confirm_password: state.confirm_password,
-      phone: state.phone,
-      dob: state.dob,
-      address: state.address,
-      role: state.role,
-      profile: state.profile,
-    }),
+
+    //forgot password (to sent mail)
+    async forgotPassword(params) {
+      try {
+        const response = await fetch(
+          `http://localhost:3002/api/v1/users/forgot_password`,
+          {
+            method: "POST",
+            body: params,
+          }
+        );
+        if (!response.ok) {
+          return {
+            status: response.status,
+          };
+        }
+        return {
+          status: response.status,
+        };
+      } catch (error) {
+        return;
+      }
+    },
+
+    //reset password
+    async resetPassword(params) {
+      try {
+        const response = await fetch(
+          `http://localhost:3002/api/v1/users/reset_password`,
+          {
+            method: "POST",
+            body: params,
+          }
+        );
+        if (!response.ok) {
+          return {
+            status: response.status,
+          };
+        }
+        return {
+          status: response.status,
+          message: "Reset password successfully.",
+        };
+      } catch (error) {
+        return;
+      }
+    },
   },
 });

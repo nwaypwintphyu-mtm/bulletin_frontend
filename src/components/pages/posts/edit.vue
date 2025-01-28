@@ -4,6 +4,24 @@
     <div class="d-flex container flex-column content-box">
       <div class="flex-fill border-success card">
         <SubHeader title="Edit Post" />
+        <div
+          v-if="state.message"
+          class="alert error-box px-3 mb-2 alert-dismissible fade show"
+          role="alert"
+        >
+          <div class="row justify-content-between px-5">
+            <span>{{ state.message }}</span>
+            <button
+              @click="reloadPage"
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            >
+              x
+            </button>
+          </div>
+        </div>
         <Button label="Back" route="/posts" />
         <div class="p-3">
           <form @submit.prevent="toEditConfirm">
@@ -87,13 +105,13 @@
 
 <script>
 import { onMounted, reactive, ref } from "vue";
-import SubHeader from "../../Layouts/SubHeader.vue";
-import Footer from "../../Layouts/Footer.vue";
-import Header from "../../Layouts/Header.vue";
 import { usePostsStore } from "../../../stores/posts";
 import { useUsersStore } from "../../../stores/users";
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
+import Header from "../../Layouts/Header.vue";
+import SubHeader from "../../Layouts/SubHeader.vue";
+import Footer from "../../Layouts/Footer.vue";
 import SwitchButton from "../../compos/SwitchBtn.vue";
 import Button from "../../compos/Button.vue";
 
@@ -122,28 +140,43 @@ export default {
         description: "",
         status: 0,
       },
+      message: "", //message for invalid id entering from url
     });
 
-    function getSwtichValue(switch_staus) {
-      state.post.status = switch_staus;
-    }
-
+    //showin posts and set current_user on mounted
     onMounted(() => {
+      // get post
       loadPost();
+      // set current user
       current_user.value = usersStore.current_user;
     });
-    async function loadPost() {
-      const postId = route.params.id;
-      const post = await postsStore.getPostById(postId);
 
-      if (post) {
-        state.post.title = post.title;
-        state.post.description = post.description;
-        state.post.status = post.status;
-        state.post.updated_user_id = current_user.value.id;
+    //get switch value from switch component
+    const getSwtichValue = (switch_staus) => {
+      state.post.status = switch_staus;
+    };
+
+    //get posts
+    async function loadPost() {
+      const postId = route.params.id; //to know current user and to retrieve posts according to role
+      const response = await postsStore.getPostById(postId);
+      if (response.status === 200) {
+        const post = response.data;
+
+        //if posts exists, set into state.posts
+        if (post) {
+          state.post.title = post.title;
+          state.post.description = post.description;
+          state.post.status = post.status;
+          state.post.updated_user_id = current_user.value.id;
+        }
+      } else {
+        // for entering invalid id
+        state.message = "Post not found!";
       }
     }
 
+    //go to edit confirm page
     function toEditConfirm() {
       titleError.value = "";
       descriptionError.value = "";
@@ -163,10 +196,12 @@ export default {
         };
         postsStore.setPost(state.post);
 
-        router.push({ path: "/posts/edit/confirm", query: params });
+        //route to confirm page
+        router.push({ path: "/posts/edit/confirm", query:params });
       }
     }
 
+    //reset form values
     function clearForm() {
       state.post.title = "";
       state.post.description = "";
@@ -208,7 +243,7 @@ label {
   margin-left: 4px;
 }
 .error-box {
-  border: 1px solid rgba(255, 0, 0, 0.43);
-  background-color: rgba(255, 0, 0, 0.04);
+  background-color: rgba(255, 0, 0, 0.133);
+  color: rgb(201, 0, 0);
 }
 </style>

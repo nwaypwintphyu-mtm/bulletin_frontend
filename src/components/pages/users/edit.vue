@@ -65,9 +65,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="address" class="col-3 col-form-label"
-                >Address:</label
-              >
+              <label for="address" class="col-3 col-form-label">Address:</label>
               <div class="col-9">
                 <input
                   type=""
@@ -122,15 +120,16 @@
               <div class="col-9">
                 <button class="btn btn-success" @click="edit">Edit</button
                 >&nbsp;
-                <button class="btn btn-secondary text-light" type="reset" @click="clear">
+                <button
+                  class="btn btn-secondary text-light"
+                  type="reset"
+                  @click="clear"
+                >
                   Clear</button
                 >&nbsp;
-                <button
-                  href=""
-                  class="text-primary"
-                  @click="toChangePassword"
-                  >Change Password</button
-                >
+                <button href="" class="text-primary" @click="toChangePassword">
+                  Change Password
+                </button>
               </div>
             </div>
           </div>
@@ -144,6 +143,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUsersStore } from "../../../stores/users";
+import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import FileUpload from "../../compos/FileUpload.vue";
 import Button from "../../compos/Button.vue";
@@ -158,6 +158,7 @@ export default {
   },
   setup() {
     const usersStore = useUsersStore();
+    const toast = useToast();
     const router = useRouter();
     const current_user = ref(null);
     const name = ref("");
@@ -179,7 +180,7 @@ export default {
     });
 
     onMounted(() => {
-      current_user.value = usersStore.current_user;
+      current_user.value = usersStore.current_user; //get current user from store
       name.value = current_user.value.name;
       email.value = current_user.value.email;
       phone.value = current_user.value.phone;
@@ -189,6 +190,7 @@ export default {
       profile.value = current_user.value.profile;
     });
 
+    //get previous image if exist
     function getInitialImage() {
       if (
         current_user.value &&
@@ -197,9 +199,11 @@ export default {
       ) {
         return getFilename(current_user.value.profile.url);
       }
+      //if not exist, return null
       return null;
     }
 
+    //get file name of previous image to show in file upload box
     function getFilename(path) {
       if (path) {
         const pathParts = path.split("/");
@@ -207,19 +211,30 @@ export default {
       }
     }
 
+    //get selected file from fileupload component
     function onFileSelected(file) {
       state.profile = file;
       state.preview_profile = URL.createObjectURL(file);
     }
 
+    //get date from datepicker component
     function getDate(date) {
       dob.value = date;
     }
 
+    //go to change password page
     function toChangePassword() {
       router.push({ name: "ChangePassword" });
     }
 
+    //show error
+    const showErrorToast = (toastMessage) => {
+      toast.error(toastMessage, {
+        duration: 5000,
+      });
+    };
+
+    //edit user
     async function edit() {
       state.nameError = "";
       state.emailError = "";
@@ -250,15 +265,22 @@ export default {
         formData.append("user[profile]", state.profile);
         try {
           const response = await usersStore.updateUser(formData);
+          //if update success, go to users list page
           if (response.status === 200) {
             router.push({ name: "Users" });
           }
+          //if failes, show toast
+          else {
+            showErrorToast("Failed to update user! Please try again...");
+          }
         } catch (error) {
-          console.error("Error updating user:", error);
+          showErrorToast("Failed to update user! Please try again...");
         }
       }
     }
+
     function clear() {
+      //make null to profile
       state.profile = "";
       current_user.value.profile = "";
     }
@@ -291,5 +313,4 @@ export default {
   background-color: rgba(255, 0, 0, 0.133);
   color: rgb(201, 0, 0);
 }
-
 </style>

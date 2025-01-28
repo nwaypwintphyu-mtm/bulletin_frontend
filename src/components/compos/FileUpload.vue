@@ -15,7 +15,6 @@
 
 <script>
 import { ref, computed } from "vue";
-
 export default {
   props: {
     initialImage: {
@@ -23,9 +22,11 @@ export default {
       default: "",
     },
   },
-  setup(props, { emit }) {
+
+  setup(props, context) {
     const file = ref(null);
 
+    //showing filename in confirm edit page
     const displayFileName = computed(() => {
       if (file.value) {
         return file.value.name;
@@ -36,10 +37,11 @@ export default {
       }
     });
 
+    //sent selected file to parent
     const onFileChange = (event) => {
       const selectedFile = event.target.files[0];
       file.value = selectedFile;
-      emit("file-selected", selectedFile);
+      context.emit("file-selected", selectedFile);
     };
 
     return {

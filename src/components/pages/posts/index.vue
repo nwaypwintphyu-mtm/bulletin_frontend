@@ -300,21 +300,23 @@
 
 <script>
 import { ref, reactive, onMounted, computed } from "vue";
+import { usePostsStore } from "../../../stores/posts";
+import { useRouter } from "vue-router";
+import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import Header from "../../Layouts/Header.vue";
 import Footer from "../../Layouts/Footer.vue";
-import { usePostsStore } from "../../../stores/posts";
-import { useRouter } from "vue-router";
 
 export default {
   components: {
-    SubHeader,
     Header,
+    SubHeader,
     Footer,
   },
 
   setup() {
     const postsStore = usePostsStore();
+    const toast = useToast();
     const router = useRouter();
     const searchText = ref("");
     const itemsPerPage = 6;
@@ -329,48 +331,92 @@ export default {
       updateUser: "",
     });
 
+    //showing posts on mounted
     onMounted(async () => {
       await fetchPosts();
     });
 
-    const fetchPosts = async () => {
-      await postsStore.getPosts();
-      state.posts = postsStore.posts;
-      state.filterPosts = state.posts;
-      state.successMsg = postsStore.successMessage;
+    //error toast to handle error
+    const showErrorToast = (toastMessage) => {
+      toast.error(toastMessage, {
+        duration: 5000,
+      });
     };
 
+    //total page for pagination
     const totalPages = computed(() => {
       return Math.ceil(state.filterPosts.length / itemsPerPage);
     });
 
+    //posts in one page
     const paginatedPosts = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage;
       return state.filterPosts.slice(start, start + itemsPerPage);
     });
 
+    //next button in pagination
+    function nextPage() {
+      if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
+    }
+
+    //number buttons in pagination
+    function goToPage(page) {
+      currentPage.value = page;
+    }
+
+    //previous button in pagination
+    function prevPage() {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+      }
+    }
+
+    //get all posts from store
+    const fetchPosts = async () => {
+      try {
+        const response = await postsStore.getPosts();
+        if (response.status === 200) {
+          state.posts = response.data;
+          state.filterPosts = state.posts;
+          state.successMsg = postsStore.successMessage; //for showing success message from post store
+        } else {
+          showErrorToast("Failed to load posts! Please try again...");
+        }
+      } catch (error) {
+        showErrorToast("Failed to load posts! Please try again...");
+      }
+    };
+
+    //set selected post for edit, delete modal
     function setSelectedPost(post) {
       state.selectedPost = post;
       state.createUser = post.create_user["name"];
       state.updateUser = post.update_user["name"];
     }
 
+    //reload after clicking close button not to show deleted post
     function reloadPage() {
       location.reload();
     }
 
+    //delete post in deleted modal
     async function deletePost(id) {
       try {
         const response = await postsStore.deletePost(id);
         if (response.status == 200) {
-          state.successMsg = "Post deleted successfully!";
+          state.successMsg = response.message;
+        } else {
+          showErrorToast("Failed to delete post! Please try again...");
         }
       } catch (error) {
-        console.error("Error deleting post:", error);
+        showErrorToast("Failed to delete post! Please try again...");
       }
     }
 
-    function search() {
+    //filtering posts with keyword
+    const search = () => {
       if (!searchText.value) {
         state.filterPosts = state.posts;
       } else {
@@ -388,20 +434,9 @@ export default {
           return titleMatch || descriptionMatch || createUserMatch;
         });
       }
-    }
-    function nextPage() {
-      if (currentPage.value < totalPages.value) {
-        currentPage.value++;
-      }
-    }
-    function goToPage(page) {
-      currentPage.value = page;
-    }
-    function prevPage() {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-      }
-    }
+    };
+
+    //formattiong date like y/m/d
     function formatDate(dateString) {
       const date = new Date(dateString);
       const year = date.getFullYear();
@@ -410,38 +445,48 @@ export default {
       return `${year}/${month}/${day}`;
     }
 
+    //route to create page
     function toCreatePage() {
       router.push({ path: "/posts/create" });
     }
+
+    //route to edit page with post id
     function toEditPage(postId) {
       router.push({ path: `/posts/edit/${postId}` });
     }
+
+    //route to upload page
     function toUpload() {
       router.push({ name: "PostsUpload" });
     }
+
+    //downloading posts csv
     async function downloadCsv() {
       try {
         const response = await postsStore.downloadPosts();
+        if (response.status === 200) {
+          const blob = await response.data; //post binary data with csv
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+          const link = document.createElement("a");
+
+          const url = window.URL.createObjectURL(blob); //make url to download
+
+          link.href = url;
+
+          link.setAttribute("download", "posts.csv");
+
+          document.body.appendChild(link);
+
+          link.click();
+
+          document.body.removeChild(link);
+
+          window.URL.revokeObjectURL(url);
+        } else {
+          showErrorToast("Failed to download posts! Please try again...");
         }
-        const blob = await response.blob();
-
-        const link = document.createElement("a");
-        const url = window.URL.createObjectURL(blob);
-
-        link.href = url;
-        link.setAttribute("download", "posts.csv");
-
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        window.URL.revokeObjectURL(url);
       } catch (error) {
-        console.error("Error downloading posts:", error);
-        throw error;
+        showErrorToast("Failed to download posts! Please try again...");
       }
     }
 
@@ -463,6 +508,7 @@ export default {
       reloadPage,
       toUpload,
       downloadCsv,
+      showErrorToast,
     };
   },
 };

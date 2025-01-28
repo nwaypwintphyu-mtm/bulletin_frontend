@@ -12,6 +12,7 @@ import PostEditConfirm from "../components/pages/posts/edit_confirm.vue";
 import PostsUpload from "../components/pages/posts/upload.vue";
 import RegisterConfirm from "../components/pages/users/register_confirm.vue";
 import ForgotPassword from "../components/pages/ForgotPassword.vue";
+import ResetPassword from "../components/pages/ResetPassword.vue";
 import ChangePassword from "../components/pages/users/change_password.vue";
 import { useUsersStore } from "../stores/users";
 
@@ -94,6 +95,12 @@ const routes = [
     name: "RegisterConfirm",
     component: RegisterConfirm,
   },
+  {
+    path: "/reset-password/:token",
+    name: "ResetPassword",
+    component: ResetPassword,
+    props: true,
+  },
 ];
 
 const router = createRouter({
@@ -101,10 +108,10 @@ const router = createRouter({
   routes,
 });
 
+// user auth
 router.beforeEach((to, from, next) => {
   const usersStore = useUsersStore();
   const isAuthenticated = usersStore.current_user !== null;
-
   if (
     to.matched.some((record) => record.meta.requiresAuth) &&
     !isAuthenticated
