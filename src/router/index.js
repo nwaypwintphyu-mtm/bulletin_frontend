@@ -110,7 +110,7 @@ const router = createRouter({
 });
 
 // user auth
-router.beforeEach((to, next) => {
+router.beforeEach((to, from, next) => {
   const usersStore = useUsersStore();
   const isAuthenticated = usersStore.current_user !== null;
   if (
