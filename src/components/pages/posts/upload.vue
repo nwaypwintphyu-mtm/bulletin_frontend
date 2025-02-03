@@ -117,10 +117,10 @@ export default {
               );
             }
           } catch (error) {
+            console.error(error);
             showErrorToast(
               "Failed to upload post with csv! Please try again..."
             );
-            console.error;
           }
         }
       };

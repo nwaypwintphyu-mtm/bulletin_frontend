@@ -137,8 +137,8 @@ export default {
             showErrorToast("Failed to reset password! Please try again...");
           }
         } catch (error) {
+          console.error(error);
           showErrorToast("Failed to reset password! Please try again...");
-          console.error;
         }
       }
     }
