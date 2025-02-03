@@ -12,7 +12,6 @@
           <div class="row justify-content-between px-5">
             <span>{{ state.deleteSuccessMsg }}</span>
             <button
-              @click="reloadPage"
               type="button"
               class="btn-close"
               data-bs-dismiss="alert"
@@ -30,7 +29,6 @@
           <div class="row justify-content-between px-5">
             <span>{{ state.successMsg }}</span>
             <button
-              @click="reloadPage"
               type="button"
               class="btn-close"
               data-bs-dismiss="alert"
@@ -141,11 +139,8 @@
                           <div class="row">
                             <div class="w-25">
                               <img
-                                v-if="state.selectedUser.profile_url"
-                                :src="
-                                  'http://localhost:3002' +
-                                  state.selectedUser.profile_url
-                                "
+                                v-if="state.selectedUser.profile"
+                                :src="apiUrl + state.selectedUser.profile.url"
                                 alt="Profile Image"
                                 class="img-fluid rounded"
                                 style="max-width: 100px; height: auto"
@@ -220,7 +215,7 @@
                                 <tr>
                                   <td><b>Updated User</b></td>
                                   <td class="">
-                                    {{ state.selectedUser.updated_user_id }}
+                                    {{ state.selectedUser.updated_user_name }}
                                   </td>
                                 </tr>
                               </tbody>
@@ -369,7 +364,7 @@
             <button
               class="btn bg-success"
               @click="prevPage"
-              :disable="currentPage === 1"
+              :disabled="currentPage === 1"
             >
               Previous
             </button>
@@ -386,7 +381,7 @@
             <button
               class="btn bg-success"
               @click="nextPage"
-              :disabled="currentPage == totalPages"
+              :disabled="currentPage === totalPages"
             >
               Next
             </button>
@@ -424,6 +419,7 @@ export default {
     const itemsPerPage = 6;
     const currentPage = ref(1);
     const toast = useToast();
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     const state = reactive({
       users: [],
@@ -440,23 +436,22 @@ export default {
     });
 
     //formatting date like yy/mm/dd
-    function formatDate(dateString) {
+    const formatDate = (dateString) => {
       const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}/${month}/${day}`;
-    }
+      return `${date.getFullYear().toString().slice(2)}/${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}`;
+    };
 
     //get from date from datepicker
-    const getFromDate = (date) => {
+    function getFromDate(date) {
       fromDate.value = date;
-    };
+    }
 
     //get to date from datepicker
-    const getToDate = (date) => {
+    function getToDate(date) {
       toDate.value = date;
-    };
+    }
 
     //totalpages for pagination
     const totalPages = computed(() => {
@@ -484,9 +479,9 @@ export default {
     }
 
     //number button in pagination
-    const gotoPage = (page) => {
+    function gotoPage(page) {
       currentPage.value = page;
-    };
+    }
 
     //filtered users
     function search() {
@@ -497,37 +492,33 @@ export default {
         !toDate.value
       ) {
         state.filterUsers = state.users;
-      } else {
-        state.filterUsers = state.users.filter((user) => {
-          const nameMatch = nameSearch.value
-            ? user.name.toLowerCase().includes(nameSearch.value.toLowerCase())
-            : true;
-
-          const emailMatch = emailSearch.value
-            ? user.email.toLowerCase().includes(emailSearch.value.toLowerCase())
-            : true;
-
-          const fromDateMatch = fromDate.value
-            ? new Date(user.created_at) >= new Date(fromDate.value)
-            : true;
-
-          const toDateMatch = toDate.value
-            ? new Date(user.created_at) <= new Date(toDate.value)
-            : true;
-          //filter users according to name , emial, from , to matches
-          return nameMatch && emailMatch && fromDateMatch && toDateMatch;
-        });
+        return;
       }
+      state.filterUsers = state.users.filter((user) => {
+        const nameMatch = nameSearch.value
+          ? user.name.toLowerCase().includes(nameSearch.value.toLowerCase())
+          : true;
+
+        const emailMatch = emailSearch.value
+          ? user.email.toLowerCase().includes(emailSearch.value.toLowerCase())
+          : true;
+
+        const fromDateMatch = fromDate.value
+          ? new Date(user.created_at) >= new Date(fromDate.value)
+          : true;
+
+        const toDateMatch = toDate.value
+          ? new Date(user.created_at) <= new Date(toDate.value)
+          : true;
+
+        //filter users according to name , emial, from , to matches
+        return nameMatch && emailMatch && fromDateMatch && toDateMatch;
+      });
     }
 
     //set selected user for delete user modal
     function setSelectedUser(selectedUser) {
       state.selectedUser = selectedUser;
-    }
-
-    //reload page no to show deleted users after deletion
-    function reloadPage() {
-      location.reload();
     }
 
     //show error
@@ -543,16 +534,20 @@ export default {
         const response = await usersStore.deleteUser(id);
         if (response.status === 200) {
           state.deleteSuccessMsg = response.message;
+
+          state.users = state.users.filter((user) => user.id !== id);
+          state.filterUsers = state.filterUsers.filter((user) => user.id != id);
         } else {
           showErrorToast("Failed to delete user! Please try again...");
         }
       } catch (error) {
         showErrorToast("Failed to delete user! Please try again...");
+        console.error;
       }
     }
 
     //get users
-    const fetchUsers = async () => {
+    async function fetchUsers() {
       try {
         const response = await usersStore.getUsers();
         if (response.status === 200) {
@@ -562,15 +557,15 @@ export default {
         }
       } catch (error) {
         showErrorToast("Failed to load users! Please try again...");
+        console.error;
       }
-    };
+    }
 
     return {
       state,
       formatDate,
       setSelectedUser,
       deleteUser,
-      reloadPage,
       fromDate,
       toDate,
       getFromDate,
@@ -585,6 +580,7 @@ export default {
       nextPage,
       gotoPage,
       showErrorToast,
+      apiUrl,
     };
   },
 };

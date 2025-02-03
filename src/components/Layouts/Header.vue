@@ -104,6 +104,7 @@ export default {
         }
       } catch (error) {
         showErrorToast();
+        console.error;
       }
     };
 
