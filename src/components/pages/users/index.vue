@@ -541,8 +541,8 @@ export default {
           showErrorToast("Failed to delete user! Please try again...");
         }
       } catch (error) {
+        console.error(error);
         showErrorToast("Failed to delete user! Please try again...");
-        console.error;
       }
     }
 
@@ -556,8 +556,8 @@ export default {
           showErrorToast("Failed to load users! Please try again...");
         }
       } catch (error) {
+        console.error(error);
         showErrorToast("Failed to load users! Please try again...");
-        console.error;
       }
     }
 

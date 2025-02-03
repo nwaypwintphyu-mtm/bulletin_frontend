@@ -103,8 +103,8 @@ export default {
           showErrorToast();
         }
       } catch (error) {
+        console.error(error);
         showErrorToast();
-        console.error;
       }
     };
 

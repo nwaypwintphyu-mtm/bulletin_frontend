@@ -89,8 +89,8 @@ export default {
             showErrorToast("Failed to send reset email! Please try again...");
           }
         } catch (error) {
+          console.error(error);
           showErrorToast("Failed to send reset email! Please try again...");
-          console.error;
         }
       }
     }
