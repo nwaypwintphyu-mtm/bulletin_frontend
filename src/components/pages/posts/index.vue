@@ -12,7 +12,6 @@
           <div class="row justify-content-between px-5">
             <span>{{ state.successMsg }}</span>
             <button
-              @click="reloadPage"
               type="button"
               class="btn-close"
               data-bs-dismiss="alert"
@@ -164,6 +163,7 @@
                 <td>{{ formatDate(post.created_at) }}</td>
                 <td>
                   <button
+                    id="edit"
                     class="btn btn-primary btn-sm"
                     @click="toEditPage(post.id)"
                   >
@@ -386,6 +386,7 @@ export default {
         }
       } catch (error) {
         showErrorToast("Failed to load posts! Please try again...");
+        console.error;
       }
     };
 
@@ -396,22 +397,28 @@ export default {
       state.updateUser = post.update_user["name"];
     }
 
-    //reload after clicking close button not to show deleted post
-    function reloadPage() {
-      location.reload();
-    }
-
     //delete post in deleted modal
     async function deletePost(id) {
       try {
         const response = await postsStore.deletePost(id);
         if (response.status == 200) {
           state.successMsg = response.message;
+          // fix dynamic post deletion update
+          state.posts = state.posts.filter((post) => post.id !== id);
+          state.filterPosts = state.filterPosts.filter(
+            (post) => post.id !== id
+          );
+
+          // if there are no posts in the current page, go to the previous page
+          if (paginatedPosts.value.length === 0 && currentPage.value > 1) {
+            currentPage.value--;
+          }
         } else {
           showErrorToast("Failed to delete post! Please try again...");
         }
       } catch (error) {
         showErrorToast("Failed to delete post! Please try again...");
+        console.error;
       }
     }
 
@@ -487,6 +494,7 @@ export default {
         }
       } catch (error) {
         showErrorToast("Failed to download posts! Please try again...");
+        console.error;
       }
     }
 
@@ -505,7 +513,6 @@ export default {
       deletePost,
       search,
       searchText,
-      reloadPage,
       toUpload,
       downloadCsv,
       showErrorToast,

@@ -152,6 +152,7 @@ export default {
           }
         } catch (error) {
           showErrorToast("Failed to change password!");
+          console.error;
         }
       }
     }

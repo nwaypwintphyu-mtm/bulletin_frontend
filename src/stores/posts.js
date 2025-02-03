@@ -192,6 +192,7 @@ export const usePostsStore = defineStore("posts", {
             }),
           }
         );
+
         if (!response.ok) {
           return {
             status: response.status,

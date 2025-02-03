@@ -76,20 +76,14 @@
             <div class="mb-4 row">
               <label for="role" class="col-4 col-form-label">Type</label>
               <div class="col-8">
+                <!-- fix showing role in view -->
                 <input
-                  v-if="(role = 0)"
-                  id="confirm_password"
+                  v-if="role == 0"
                   class="form-control"
                   value="Admin"
                   readonly
                 />
-                <input
-                  v-else
-                  id="confirm_password"
-                  class="form-control"
-                  value="User"
-                  readonly
-                />
+                <input v-else class="form-control" value="User" readonly />
               </div>
             </div>
             <div class="mb-4 row">
@@ -158,9 +152,9 @@
 <script>
 import { onMounted, ref } from "vue";
 import { useUsersStore } from "../../../stores/users";
+import { useToast } from "vue-toast-notification";
 import { useRouter } from "vue-router";
 import Button from "../../compos/Button.vue";
-import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import DatePicker from "../../compos/DatePicker.vue";
 
@@ -212,11 +206,13 @@ export default {
     function toRegister() {
       router.push({ name: "Register" });
     }
-    const showErrorToast = () => {
+
+    //show errors
+    function showErrorToast() {
       toast.error("Failed to register user! Please try again...", {
         duration: 5000,
       });
-    };
+    }
 
     //register user
     async function Register() {
@@ -236,11 +232,12 @@ export default {
           router.push({ name: "Users" });
         } else if (response.status === 422) {
           duplicateError.value = "Email already exists!";
-        }else if (response.status === 500) {
+        } else if (response.status === 500) {
           duplicateError.value = "Name already exists!";
         }
       } catch (error) {
         showErrorToast();
+        console.error;
       }
     }
 

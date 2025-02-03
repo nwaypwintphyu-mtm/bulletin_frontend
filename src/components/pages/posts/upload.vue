@@ -120,6 +120,7 @@ export default {
             showErrorToast(
               "Failed to upload post with csv! Please try again..."
             );
+            console.error;
           }
         }
       };

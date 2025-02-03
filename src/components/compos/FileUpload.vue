@@ -26,7 +26,7 @@ export default {
   setup(props, context) {
     const file = ref(null);
 
-    //showing filename in confirm edit page
+    //showing filename in edit page
     const displayFileName = computed(() => {
       if (file.value) {
         return file.value.name;

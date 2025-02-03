@@ -110,15 +110,14 @@ export default {
       }
     });
 
-    //showing error 
+    //showing error
     const showErrorToast = (toastMessage) => {
       toast.error(toastMessage, {
         duration: 5000,
       });
     };
 
-
-    //edit post 
+    //edit post
     async function editPost() {
       //set post id and updated post in param
       const params = {
@@ -132,11 +131,12 @@ export default {
           router.push({ path: "/posts" });
         }
         //if fail, show toast
-         else {
+        else {
           showErrorToast("Failed to update post! Please try again...");
         }
       } catch (error) {
         showErrorToast("Failed to update post! Please try again...");
+        console.error;
       }
     }
 

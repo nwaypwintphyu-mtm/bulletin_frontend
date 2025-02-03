@@ -12,7 +12,7 @@
               <label for="email" class="col-sm-3 col-form-label">Email:</label>
               <div class="col-sm-9">
                 <input
-                  type=""
+                  type="email"
                   id="email"
                   class="form-control"
                   v-model="email"
@@ -27,12 +27,7 @@
                 >Password:</label
               >
               <div class="col-sm-9">
-                <input
-                  type="password"
-                  id="password"
-                  class="form-control"
-                  v-model="password"
-                />
+                <input type="password" class="form-control" v-model="password" />
                 <div v-if="state.passwordError" class="text-danger mt-1">
                   {{ state.passwordError }}
                 </div>
@@ -89,9 +84,7 @@ export default {
 
     const state = reactive({
       emailError: "",
-      emailFomatError: "",
       passwordError: "",
-      emailNotMatchError: "",
     });
 
     onMounted(() => {
@@ -128,7 +121,7 @@ export default {
       if (!password.value) {
         state.passwordError = "Password can't be blank";
       }
-      
+
       if (!state.emailError && !state.passwordError) {
         const params = {
           email: email.value,
@@ -151,6 +144,7 @@ export default {
           }
         } catch (error) {
           showErrorToast();
+          console.error;
         }
       }
     }

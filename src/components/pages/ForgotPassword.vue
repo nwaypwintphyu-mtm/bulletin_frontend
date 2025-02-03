@@ -90,6 +90,7 @@ export default {
           }
         } catch (error) {
           showErrorToast("Failed to send reset email! Please try again...");
+          console.error;
         }
       }
     }

@@ -22,6 +22,7 @@
                     id="title"
                     class="form-control"
                     v-model="title"
+                    readonly
                   />
                   <div v-if="titleError" class="text-danger mt-1">
                     {{ titleError }}
@@ -40,6 +41,7 @@
                     class="form-control"
                     v-model="description"
                     rows="4"
+                    readonly
                   ></textarea>
                   <div v-if="descriptionError" class="text-danger mt-1">
                     {{ descriptionError }}
@@ -140,6 +142,7 @@ export default {
           const response = await postsStore.createPost(params);
           // if create success, go to post list page
           if (response.status === 200) {
+            postsStore.setPost(null); //clear form after create one post
             router.push({ path: "/posts" });
           } else {
             //if failed, showing toast
@@ -148,6 +151,7 @@ export default {
         } catch (error) {
           //if failed, showing toast
           showErrorToast("Failed to create post! Please try again...");
+          console.error;
         }
       }
     }
