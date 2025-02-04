@@ -54,6 +54,9 @@
                   class="form-control"
                   v-model="phone"
                 />
+                <div v-if="state.phoneError" class="text-danger mt-1">
+                  {{ state.phoneError }}
+                </div>
               </div>
             </div>
             <div class="mb-4 row">
@@ -80,19 +83,14 @@
                 >Old profile:</label
               >
               <div class="w-25 ms-4" v-if="current_user">
-                <div v-if="state.preview_profile">
+                <div class="w-25 ms-4" v-if="current_user">
                   <img
-                    v-if="state.preview_profile"
-                    :src="state.preview_profile"
-                    alt="Profile Image"
-                    class="img-fluid rounded"
-                    style="max-width: 150px; height: auto"
-                  />
-                </div>
-                <div v-else>
-                  <img
-                    v-if="current_user.profile.url"
-                    :src="'http://localhost:3002' + current_user.profile.url"
+                    :src="
+                      state.preview_profile ||
+                      (current_user.profile.url
+                        ? apiUrl + current_user.profile.url
+                        : '')
+                    "
                     alt="Profile Image"
                     class="img-fluid rounded"
                     style="max-width: 150px; height: auto"
@@ -170,12 +168,14 @@ export default {
     const profile = ref(null);
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     const state = reactive({
       profile: null,
       preview_profile: null,
       nameError: "",
       emailError: "",
+      phoneError: "",
       profileTypeError: "",
     });
 
@@ -238,9 +238,14 @@ export default {
     async function edit() {
       state.nameError = "";
       state.emailError = "";
+      state.phoneError = "";
+
       if (!name.value) {
         state.nameError = "Name can't be blank.";
+      } else if (name.value.length > 25) {
+        state.nameError = "Name is too long.";
       }
+
       if (!email.value) {
         state.emailError = "Email can't be blank.";
       } else if (!emailPattern.test(email.value)) {
@@ -251,7 +256,16 @@ export default {
         state.profileTypeError = "Please choose an image file.";
       }
 
-      if (!state.nameError && !state.emailError && !state.profileTypeError) {
+      if (phone.value.length > 11) {
+        state.phoneError = "Phone number is too long.";
+      }
+
+      if (
+        !state.nameError &&
+        !state.emailError &&
+        !state.profileTypeError &&
+        !state.phoneError
+      ) {
         if (!state.profile) {
           state.profile = getFilename(current_user.value.profile.url);
         }
@@ -269,7 +283,7 @@ export default {
           if (response.status === 200) {
             router.push({ name: "Users" });
           }
-          //if failes, show toast
+          //if fails, show toast
           else {
             showErrorToast("Failed to update user! Please try again...");
           }
@@ -301,6 +315,7 @@ export default {
       clear,
       getDate,
       toChangePassword,
+      apiUrl,
     };
   },
 };
@@ -309,9 +324,5 @@ export default {
 <style lang="scss" scoped>
 .card {
   border: 1px solid #e0e0e0;
-}
-.error-box {
-  background-color: rgba(255, 0, 0, 0.133);
-  color: rgb(201, 0, 0);
 }
 </style>

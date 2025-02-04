@@ -95,8 +95,8 @@
             </thead>
             <tbody>
               <tr v-for="(user, index) in paginatedUsers" :key="user.id">
-                <td>{{ index + 1 }}</td>
-                <td>
+                <td>{{ index + 1 + (currentPage - 1) * itemsPerPage }}</td>
+                <td id="userNameLink">
                   <a
                     data-toggle="modal"
                     data-target="#userDetailModal"
@@ -416,7 +416,7 @@ export default {
     const emailSearch = ref("");
     const fromDate = ref(null);
     const toDate = ref(null);
-    const itemsPerPage = 6;
+    const itemsPerPage = 5;
     const currentPage = ref(1);
     const toast = useToast();
     const apiUrl = import.meta.env.VITE_API_URL;
@@ -436,12 +436,12 @@ export default {
     });
 
     //formatting date like yy/mm/dd
-    const formatDate = (dateString) => {
+    function formatDate(dateString) {
       const date = new Date(dateString);
-      return `${date.getFullYear().toString().slice(2)}/${(date.getMonth() + 1)
+      return `${date.getFullYear()}/${(date.getMonth() + 1)
         .toString()
         .padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}`;
-    };
+    }
 
     //get from date from datepicker
     function getFromDate(date) {
@@ -581,6 +581,7 @@ export default {
       gotoPage,
       showErrorToast,
       apiUrl,
+      itemsPerPage,
     };
   },
 };
@@ -588,8 +589,14 @@ export default {
 
 <style scoped>
 #app {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+}
+
+.content-box {
+  flex-grow: 1;
+  overflow-y: auto;
 }
 
 .table {
@@ -604,6 +611,13 @@ export default {
 .table td {
   vertical-align: middle;
 }
+
+.table td#userNameLink {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .pagination {
   margin-top: 20px;
   display: flex;
@@ -613,12 +627,6 @@ export default {
 
 .btn {
   margin-right: 5px;
-}
-.content-box {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  overflow-y: auto;
-  margin: 20px auto;
 }
 
 .msg-box {

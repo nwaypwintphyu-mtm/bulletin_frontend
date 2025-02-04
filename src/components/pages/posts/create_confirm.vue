@@ -180,14 +180,18 @@ export default {
 
 <style scoped>
 #app {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
+
 .content-box {
+  flex-grow: 1;
+  overflow-y: auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   padding: 20px;
   overflow-y: auto;
-  margin: 20px auto;
+  margin: 50px auto;
 }
 
 label {

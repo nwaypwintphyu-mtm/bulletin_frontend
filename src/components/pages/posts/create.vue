@@ -110,13 +110,15 @@ export default {
 
       if (!title.value) {
         titleError.value = "Title can't be blank.";
+      } else if (title.value.length > 50) {
+        titleError.value = "50 characters is the maixmun allowed!";
       }
       if (!description.value) {
         descriptionError.value = "Description can't be blank.";
       } else if (description.value.length > 255) {
         descriptionError.value = "255 characters is the maixmun allowed!";
       }
-      if (title.value && description.value) {
+      if (!titleError.value && !descriptionError.value) {
         //set values to state.post to store in postsStore
         state.post.title = title.value;
         state.post.description = description.value;
@@ -151,15 +153,18 @@ export default {
 
 <style scoped>
 #app {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
 .content-box {
+  flex-grow: 1;
+  overflow-y: auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   padding: 20px;
   overflow-y: auto;
-  margin: 20px auto;
+  margin: 50px auto;
 }
 
 label {

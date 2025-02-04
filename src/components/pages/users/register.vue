@@ -88,6 +88,9 @@
                   class="form-control"
                   v-model="phone"
                 />
+                <div v-if="state.phoneError" class="text-danger mt-1">
+                  {{ state.phoneError }}
+                </div>
               </div>
             </div>
             <div class="mb-4 row">
@@ -213,10 +216,13 @@ export default {
       state.nameError = "";
       state.emailError = "";
       state.passwordError = "";
+      state.phoneError = "";
       state.profileError = "";
       state.passwordMatchError = "";
       if (!name.value) {
         state.nameError = "Name can't be blank.";
+      } else if (name.value.length > 25) {
+        state.nameError = "Name is too long.";
       }
       if (!email.value) {
         state.emailError = "Email can't be blank.";
@@ -225,6 +231,9 @@ export default {
       }
       if (!password.value) {
         state.passwordError = "Password can't be blank.";
+      }
+      if (phone.value.length > 11) {
+        state.phoneError = "Phone number too long.";
       }
       if (!confirm_password.value) {
         state.confirm_passwordError = "Confirm password can't be blank.";
@@ -248,7 +257,8 @@ export default {
         !state.emailError &&
         !state.passwordError &&
         !state.confirm_passwordError &&
-        !state.profileError
+        !state.profileError &&
+        !state.phoneError
       ) {
         const params = {
           name: name.value,
