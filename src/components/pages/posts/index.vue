@@ -453,6 +453,7 @@ export default {
 
     //route to create page
     function toCreatePage() {
+      postsStore.setPost(null);
       router.push({ path: "/posts/create" });
     }
 

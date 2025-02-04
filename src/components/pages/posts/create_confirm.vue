@@ -142,7 +142,6 @@ export default {
           const response = await postsStore.createPost(params);
           // if create success, go to post list page
           if (response.status === 200) {
-            postsStore.setPost(null); //clear form after create one post
             router.push({ path: "/posts" });
           } else {
             //if failed, showing toast
