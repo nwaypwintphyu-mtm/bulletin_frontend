@@ -256,7 +256,7 @@ export default {
         state.profileTypeError = "Please choose an image file.";
       }
 
-      if (phone.value.length > 11) {
+      if (phone.value.length > 12) {
         state.phoneError = "Phone number is too long.";
       }
 

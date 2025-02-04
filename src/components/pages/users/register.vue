@@ -232,7 +232,7 @@ export default {
       if (!password.value) {
         state.passwordError = "Password can't be blank.";
       }
-      if (phone.value.length > 11) {
+      if (phone.value.length > 12) {
         state.phoneError = "Phone number too long.";
       }
       if (!confirm_password.value) {
