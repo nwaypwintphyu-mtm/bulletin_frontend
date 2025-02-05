@@ -236,8 +236,8 @@ export default {
           duplicateError.value = "Name already exists!";
         }
       } catch (error) {
+        console.error(error);
         showErrorToast();
-        console.error;
       }
     }
 

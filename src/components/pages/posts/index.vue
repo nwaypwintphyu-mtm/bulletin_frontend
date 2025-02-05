@@ -385,8 +385,8 @@ export default {
           showErrorToast("Failed to load posts! Please try again...");
         }
       } catch (error) {
+        console.error(error);
         showErrorToast("Failed to load posts! Please try again...");
-        console.error;
       }
     };
 
@@ -417,8 +417,8 @@ export default {
           showErrorToast("Failed to delete post! Please try again...");
         }
       } catch (error) {
+        console.error(error);
         showErrorToast("Failed to delete post! Please try again...");
-        console.error;
       }
     }
 
@@ -493,8 +493,8 @@ export default {
           showErrorToast("Failed to download posts! Please try again...");
         }
       } catch (error) {
+        console.error(error);
         showErrorToast("Failed to download posts! Please try again...");
-        console.error;
       }
     }
 

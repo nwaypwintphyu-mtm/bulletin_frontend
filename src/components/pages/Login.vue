@@ -27,7 +27,11 @@
                 >Password:</label
               >
               <div class="col-sm-9">
-                <input type="password" class="form-control" v-model="password" />
+                <input
+                  type="password"
+                  class="form-control"
+                  v-model="password"
+                />
                 <div v-if="state.passwordError" class="text-danger mt-1">
                   {{ state.passwordError }}
                 </div>
@@ -143,8 +147,8 @@ export default {
             errorMessage.value = "Incorrect email or password!";
           }
         } catch (error) {
+          console.error(error);
           showErrorToast();
-          console.error;
         }
       }
     }

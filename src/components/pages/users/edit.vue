@@ -274,8 +274,8 @@ export default {
             showErrorToast("Failed to update user! Please try again...");
           }
         } catch (error) {
+          console.error(error);
           showErrorToast("Failed to update user! Please try again...");
-          console.error;
         }
       }
     }

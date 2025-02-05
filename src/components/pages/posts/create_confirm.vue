@@ -150,8 +150,8 @@ export default {
           }
         } catch (error) {
           //if failed, showing toast
+          console.error(error);
           showErrorToast("Failed to create post! Please try again...");
-          console.error;
         }
       }
     }
