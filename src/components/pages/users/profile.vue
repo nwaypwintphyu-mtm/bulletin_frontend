@@ -18,7 +18,7 @@
           <tbody>
             <tr>
               <td><b>Name</b></td>
-              <td class="" v-if="current_user">{{ current_user.name }}</td>
+              <td class="userName" v-if="current_user">{{ current_user.name }}</td>
             </tr>
             <tr>
               <td><b>Type</b></td>
@@ -112,5 +112,10 @@ export default {
 <style lang="scss" scoped>
 .card {
   border: 1px solid #e0e0e0;
+}
+.userName {
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 150px;
 }
 </style>

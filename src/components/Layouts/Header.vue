@@ -32,15 +32,15 @@
           </div>
           <div class="nav-item dropdown">
             <a
-              class="nav-link text-success dropdown-toggle"
+              class="nav-link text-success dropdown-toggle userName"
               href="#"
               id="navbarDropdown"
               role="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              {{ user ? user.name : "" }}
               <i class="fa fa-user"></i>
+              {{ user ? user.name : "" }}
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
               <li>
@@ -129,4 +129,11 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.userName {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>

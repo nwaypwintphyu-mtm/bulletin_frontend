@@ -92,20 +92,20 @@
                           <table class="table">
                             <tbody>
                               <tr>
-                                <td><b>Title</b></td>
-                                <td class="text-danger titleDetail">
+                                <td class="col-5"><b>Title</b></td>
+                                <td class="col-7 text-danger titleInModal">
                                   {{ state.selectedPost.title }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Description</b></td>
-                                <td class="text-danger descriptionDetail">
+                                <td class="col-5"><b>Description</b></td>
+                                <td class="col-7 text-danger descriptionDetail">
                                   {{ state.selectedPost.description }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Status</b></td>
-                                <td class="text-danger">
+                                <td class="col-5"><b>Status</b></td>
+                                <td class="col-7 text-danger">
                                   <span v-if="state.selectedPost.status == 1"
                                     >Active</span
                                   >
@@ -115,30 +115,30 @@
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Created Date</b></td>
-                                <td class="text-danger">
+                                <td class="col-5"><b>Created Date</b></td>
+                                <td class="col-7 text-danger">
                                   {{
                                     formatDate(state.selectedPost.created_at)
                                   }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Created User</b></td>
-                                <td class="text-danger">
+                                <td class="col-5"><b>Created User</b></td>
+                                <td class="col-7 text-danger createUserInModal">
                                   {{ state.createUser }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Updated Date</b></td>
-                                <td class="text-danger">
+                                <td class="col-5"><b>Updated Date</b></td>
+                                <td class="col-7 text-danger">
                                   {{
                                     formatDate(state.selectedPost.updated_at)
                                   }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Updated User</b></td>
-                                <td class="text-danger">
+                                <td class="col-5"><b>Updated User</b></td>
+                                <td class="col-7 text-danger updateUserInModal">
                                   {{ state.updateUser }}
                                 </td>
                               </tr>
@@ -159,7 +159,7 @@
                   </div>
                 </td>
                 <td id="postDescriptionLink">{{ post.description }}</td>
-                <td>
+                <td class="createUser">
                   {{ post.create_user["name"] }}
                 </td>
                 <td>{{ formatDate(post.created_at) }}</td>
@@ -175,17 +175,17 @@
                     type="button"
                     class="btn btn-sm btn-danger"
                     data-toggle="modal"
-                    data-target="#exampleModalCenter"
+                    data-target="#deleteModal"
                     @click="setSelectedPost(post)"
                   >
                     Delete
                   </button>
                   <div
                     class="modal fade"
-                    id="exampleModalCenter"
+                    id="deleteModal"
                     tabindex="-1"
                     role="dialog"
-                    aria-labelledby="exampleModalCenterTitle"
+                    aria-labelledby="deleteModalTitle"
                     aria-hidden="true"
                   >
                     <div
@@ -214,26 +214,26 @@
                           <table class="table">
                             <tbody>
                               <tr>
-                                <td><b>ID</b></td>
-                                <td class="text-danger">
+                                <td class="col-3"><b>ID</b></td>
+                                <td class="col-9 text-danger">
                                   {{ state.selectedPost.id }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Title</b></td>
-                                <td class="text-danger">
+                                <td class="col-3"><b>Title</b></td>
+                                <td class="col-9 text-danger">
                                   {{ state.selectedPost.title }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Description</b></td>
-                                <td class="text-danger">
+                                <td class="col-3"><b>Description</b></td>
+                                <td class="col-9 text-danger">
                                   {{ state.selectedPost.description }}
                                 </td>
                               </tr>
                               <tr>
-                                <td><b>Status</b></td>
-                                <td class="text-danger">
+                                <td class="col-3"><b>Status</b></td>
+                                <td class="col-9 text-danger">
                                   <span v-if="state.selectedPost.status == 1">
                                     Active
                                   </span>
@@ -542,8 +542,14 @@ export default {
   overflow-y: auto;
   margin-top: 10px;
 }
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
 .table {
+  width: 100%;
+  table-layout: fixed;
   overflow: hidden;
 }
 
@@ -552,11 +558,21 @@ export default {
   color: white;
 }
 
-.table td#postTitleLink {
+.table td#postTitleLink,
+td.createUser,
+td.updateUser {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.table td.createUserInModal,
+td.updateUserInModal,
+td.titleInModal {
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 150px;
 }
 
 .table td#postDescriptionLink {

@@ -152,7 +152,7 @@
                               <tbody>
                                 <tr>
                                   <td><b>Name</b></td>
-                                  <td class="">
+                                  <td class="userNameInModal">
                                     {{ state.selectedUser.name }}
                                   </td>
                                 </tr>
@@ -215,7 +215,7 @@
                                 </tr>
                                 <tr>
                                   <td><b>Updated User</b></td>
-                                  <td class="">
+                                  <td class="updateUserNameInModal">
                                     {{ state.selectedUser.updated_user_name }}
                                   </td>
                                 </tr>
@@ -607,7 +607,14 @@ export default {
   margin-top: 10px;
 }
 
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .table {
+  width: 100%;
+  table-layout: fixed;
   overflow: hidden;
 }
 
@@ -625,6 +632,11 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+td.userNameInModal,td.updateUserNameInModal {
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 150px;
 }
 .pagination {
   margin-top: 20px;
