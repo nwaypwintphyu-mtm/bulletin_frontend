@@ -14,6 +14,7 @@
             <button
               type="button"
               class="btn-close"
+              @click="removeMsg"
               data-bs-dismiss="alert"
               aria-label="Close"
             >
@@ -49,7 +50,7 @@
             </thead>
             <tbody>
               <tr v-for="post in paginatedPosts" :key="post.id">
-                <td>
+                <td id="postTitleLink">
                   <a
                     data-toggle="modal"
                     data-target="#postDetailModal"
@@ -65,7 +66,6 @@
                     tabindex="-1"
                     role="dialog"
                     aria-labelledby="postDetailModalTitle"
-                    aria-hidden="true"
                   >
                     <div
                       class="modal-dialog modal-dialog-centered"
@@ -93,13 +93,13 @@
                             <tbody>
                               <tr>
                                 <td><b>Title</b></td>
-                                <td class="text-danger">
+                                <td class="text-danger titleDetail">
                                   {{ state.selectedPost.title }}
                                 </td>
                               </tr>
                               <tr>
                                 <td><b>Description</b></td>
-                                <td class="text-danger">
+                                <td class="text-danger descriptionDetail">
                                   {{ state.selectedPost.description }}
                                 </td>
                               </tr>
@@ -117,7 +117,9 @@
                               <tr>
                                 <td><b>Created Date</b></td>
                                 <td class="text-danger">
-                                  {{ state.selectedPost.created_at }}
+                                  {{
+                                    formatDate(state.selectedPost.created_at)
+                                  }}
                                 </td>
                               </tr>
                               <tr>
@@ -156,7 +158,7 @@
                     </div>
                   </div>
                 </td>
-                <td>{{ post.description }}</td>
+                <td id="postDescriptionLink">{{ post.description }}</td>
                 <td>
                   {{ post.create_user["name"] }}
                 </td>
@@ -373,6 +375,11 @@ export default {
       }
     }
 
+    //remove success message after show once
+    function removeMsg() {
+      postsStore.successMessage = "";
+    }
+
     //get all posts from store
     const fetchPosts = async () => {
       try {
@@ -454,6 +461,7 @@ export default {
 
     //route to create page
     function toCreatePage() {
+      postsStore.setPost(null);
       router.push({ path: "/posts/create" });
     }
 
@@ -516,6 +524,7 @@ export default {
       toUpload,
       downloadCsv,
       showErrorToast,
+      removeMsg,
     };
   },
 };
@@ -523,8 +532,15 @@ export default {
 
 <style scoped>
 #app {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+}
+
+.content-box {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-top: 10px;
 }
 
 .table {
@@ -536,18 +552,35 @@ export default {
   color: white;
 }
 
-.table td {
-  vertical-align: middle;
+.table td#postTitleLink {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table td#postDescriptionLink {
+  max-width: 600px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-content {
+  width: 600px;
+}
+
+.descriptionDetail {
+  max-width: 300px;
+  overflow: auto;
+  word-wrap: break-word;
+  white-space: normal;
+  padding: 10px;
+  text-align: justify;
 }
 
 .btn {
   margin-right: 5px;
-}
-.content-box {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  overflow-y: auto;
-  margin: 20px auto;
 }
 
 .msg-box {
