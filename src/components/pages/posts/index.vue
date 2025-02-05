@@ -14,6 +14,7 @@
             <button
               type="button"
               class="btn-close"
+              @click="removeMsg"
               data-bs-dismiss="alert"
               aria-label="Close"
             >
@@ -116,7 +117,9 @@
                               <tr>
                                 <td><b>Created Date</b></td>
                                 <td class="text-danger">
-                                  {{ state.selectedPost.created_at }}
+                                  {{
+                                    formatDate(state.selectedPost.created_at)
+                                  }}
                                 </td>
                               </tr>
                               <tr>
@@ -372,6 +375,11 @@ export default {
       }
     }
 
+    //remove success message after show once
+    function removeMsg() {
+      postsStore.successMessage = "";
+    }
+
     //get all posts from store
     const fetchPosts = async () => {
       try {
@@ -516,6 +524,7 @@ export default {
       toUpload,
       downloadCsv,
       showErrorToast,
+      removeMsg,
     };
   },
 };
@@ -531,6 +540,7 @@ export default {
 .content-box {
   flex-grow: 1;
   overflow-y: auto;
+  margin-top: 10px;
 }
 
 .table {

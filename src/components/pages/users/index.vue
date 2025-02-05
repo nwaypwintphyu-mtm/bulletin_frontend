@@ -31,6 +31,7 @@
             <button
               type="button"
               class="btn-close"
+              @click="removeMsg"
               data-bs-dismiss="alert"
               aria-label="Close"
             >
@@ -528,6 +529,11 @@ export default {
       });
     };
 
+    //remove success message after show once
+    function removeMsg() {
+      usersStore.successMessage = "";
+    }
+
     //delete user according to id
     async function deleteUser(id) {
       try {
@@ -582,6 +588,7 @@ export default {
       showErrorToast,
       apiUrl,
       itemsPerPage,
+      removeMsg,
     };
   },
 };
@@ -597,6 +604,7 @@ export default {
 .content-box {
   flex-grow: 1;
   overflow-y: auto;
+  margin-top: 10px;
 }
 
 .table {

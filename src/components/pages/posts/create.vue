@@ -95,8 +95,10 @@ export default {
 
     onMounted(() => {
       //showing post input value when click back button from confirm page
-      title.value = postsStore.post.title;
-      description.value = postsStore.post.description;
+      if (postsStore.post) {
+        title.value = postsStore.post.title;
+        description.value = postsStore.post.description;
+      }
     });
 
     const state = reactive({

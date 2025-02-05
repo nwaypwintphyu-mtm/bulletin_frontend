@@ -83,19 +83,17 @@
                 >Old profile:</label
               >
               <div class="w-25 ms-4" v-if="current_user">
-                <div class="w-25 ms-4" v-if="current_user">
-                  <img
-                    :src="
-                      state.preview_profile ||
-                      (current_user.profile.url
-                        ? apiUrl + current_user.profile.url
-                        : '')
-                    "
-                    alt="Profile Image"
-                    class="img-fluid rounded"
-                    style="max-width: 150px; height: auto"
-                  />
-                </div>
+                <img
+                  :src="
+                    state.preview_profile ||
+                    (current_user.profile.url
+                      ? apiUrl + current_user.profile.url
+                      : '')
+                  "
+                  alt="Profile Image"
+                  class="img-fluid rounded"
+                  style="max-width: 150px; height: auto"
+                />
               </div>
             </div>
             <div class="mb-4 row">
@@ -228,11 +226,11 @@ export default {
     }
 
     //show error
-    const showErrorToast = (toastMessage) => {
+    function showErrorToast(toastMessage) {
       toast.error(toastMessage, {
         duration: 5000,
       });
-    };
+    }
 
     //edit user
     async function edit() {
