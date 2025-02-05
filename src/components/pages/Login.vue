@@ -1,13 +1,10 @@
 <template>
   <div class="container-fluid">
     <div class="card w-50 m-auto mt-5 rounded shadow">
-      <nav class="bg-success text-light p-3 text-start">
-        <h6>Login</h6>
-      </nav>
+      <SubHeader title="Login" />
       <div v-if="errorMessage" class="error-box p-3 text-start">
         {{ errorMessage }}
       </div>
-
       <div class="card-body">
         <form @submit.prevent="login">
           <div class="w-75 m-auto">
@@ -15,7 +12,7 @@
               <label for="email" class="col-sm-3 col-form-label">Email:</label>
               <div class="col-sm-9">
                 <input
-                  type=""
+                  type="email"
                   id="email"
                   class="form-control"
                   v-model="email"
@@ -56,17 +53,9 @@
             <div class="mb-4 row">
               <div class="col-sm-3"></div>
               <div class="col-sm-9">
-                <button type="submit" class="btn btn-success w-100">
+                <button type="submit" class="btn bg-success w-100">
                   Login
                 </button>
-              </div>
-            </div>
-            <div class="mb-4 row">
-              <div class="col-sm-3"></div>
-              <div class="col-sm-9">
-                <router-link to="/register" class="text-decoration-none">
-                  Create account? <i class="fa fa-user"></i>
-                </router-link>
               </div>
             </div>
           </div>
@@ -79,27 +68,35 @@
 <script>
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useUsersStore } from "../../stores/users";
+import { useToast } from "vue-toast-notification";
+import SubHeader from "../Layouts/SubHeader.vue";
 
 export default {
+  components: {
+    SubHeader,
+  },
   setup() {
     const email = ref("");
+    const current_user = ref(null);
     const password = ref("");
     const errorMessage = ref("");
     const router = useRouter();
     const rememberMe = ref(false);
+    const usersStore = useUsersStore();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const toast = useToast();
 
     const state = reactive({
       emailError: "",
-      emailFomatError: "",
       passwordError: "",
-      allFieldError: "",
-      emailNotMatchError: "",
     });
 
     onMounted(() => {
+      //if remembered checked auto filled email and password
       const savedEmail = localStorage.getItem("savedEmail");
       const savedPassword = localStorage.getItem("savedPassword");
+      current_user.value = useUsersStore.current_user;
 
       if (savedEmail && savedPassword) {
         email.value = savedEmail;
@@ -107,64 +104,53 @@ export default {
         rememberMe.value = true;
       }
     });
+
+    //show error
+    const showErrorToast = () => {
+      toast.error("Login failed! Please try again..", {
+        duration: 5000,
+      });
+    };
+
+    //login
     async function login() {
       state.emailError = "";
       state.passwordError = "";
-      state.allFieldError = "";
 
       if (!email.value) {
         state.emailError = "Email can't be blank";
       } else if (!emailPattern.test(email.value)) {
         state.emailError = "Email format is invalid";
       }
+
       if (!password.value) {
         state.passwordError = "Password can't be blank";
       }
 
-      if (state.emailError || state.passwordError) {
-        return;
-      }
+      if (!state.emailError && !state.passwordError) {
+        const params = {
+          email: email.value,
+          password: password.value,
+        };
+        try {
+          const response = await usersStore.userLogin(params);
 
-      try {
-        const response = await fetch("http://localhost:3002/api/v1/sessions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email.value,
-            password: password.value,
-          }),
-        });
-
-        if (response.status === 200) {
-          const data = await response.json();
-          const user = data.user;
-
-          localStorage.setItem("user", JSON.stringify(user));
-
-          if (rememberMe.value) {
-            localStorage.setItem("savedEmail", email.value);
-            localStorage.setItem("savedPassword", password.value);
+          if (response.status === 200) {
+            if (rememberMe.value) {
+              localStorage.setItem("savedEmail", email.value);
+              localStorage.setItem("savedPasswrod", password.value);
+            } else {
+              localStorage.removeItem("savedEmail");
+              localStorage.removeItem("savedPassword");
+            }
+            router.push({ path: "/posts" });
           } else {
-            localStorage.removeItem("savedEmail");
-            localStorage.removeItem("savedPassword");
+            errorMessage.value = "Incorrect email or password!";
           }
-          router.push({ path: "/posts" });
-        } else {
-          const data = await response.json();
-          if (response.status === 404) {
-            errorMessage.value = data.error || "Email doesn't exist.";
-          } else if (response.status === 401) {
-            errorMessage.value = data.error || "Incorrect password.";
-          } else {
-            state.value.notMatchError =
-              data.error || "Login failed. Please try again.";
-          }
-          errorMessage.value = data.error;
+        } catch (error) {
+          console.error(error);
+          showErrorToast();
         }
-      } catch (error) {
-        errorMessage.value = "An error occurred. Please try again.";
       }
     }
 
@@ -175,6 +161,7 @@ export default {
       state,
       rememberMe,
       errorMessage,
+      showErrorToast,
     };
   },
 };

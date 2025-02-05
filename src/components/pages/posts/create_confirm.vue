@@ -4,17 +4,17 @@
     <div class="d-flex container flex-column content-box">
       <div class="flex-fill border-success card">
         <SubHeader title="Create Post" />
-        <Button label="Back" route="/posts" />
+        <Button label="Back" route="/posts/create" />
         <div class="p-3">
-          <form @submit.prevent="toCreateConfirm">
+          <form @submit.prevent="create">
             <div class="w-75 m-auto">
               <div class="mb-4 m-auto row">
                 <label
                   for="title"
-                  class="required col-sm-3 col-form-label text-end"
+                  class="required col-3 col-form-label text-end"
                   >Title</label
                 >
-                <div class="col-sm-5">
+                <div class="col-5">
                   <input
                     type="text"
                     Specify
@@ -22,6 +22,7 @@
                     id="title"
                     class="form-control"
                     v-model="title"
+                    readonly
                   />
                   <div v-if="titleError" class="text-danger mt-1">
                     {{ titleError }}
@@ -31,15 +32,16 @@
               <div class="mb-4 m-auto row">
                 <label
                   for="description"
-                  class="required col-sm-3 col-form-label text-end"
+                  class="required col-3 col-form-label text-end"
                   >Description</label
                 >
-                <div class="col-sm-5">
+                <div class="col-5">
                   <textarea
                     id="description"
                     class="form-control"
                     v-model="description"
                     rows="4"
+                    readonly
                   ></textarea>
                   <div v-if="descriptionError" class="text-danger mt-1">
                     {{ descriptionError }}
@@ -47,15 +49,15 @@
                 </div>
               </div>
               <div class="mb-4 m-auto row">
-                <div class="col-sm-3"></div>
-                <div class="col-sm-5">
-                  <button class="btn bg-success">Create</button>&nbsp;
+                <div class="col-3"></div>
+                <div class="col-5">
+                  <button class="btn bg-success">Confirm</button>&nbsp;
                   <button
-                    type="button"
+                    type="reset"
                     class="btn btn-secondary"
                     @click="clearForm"
                   >
-                    Clear
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -69,11 +71,12 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from "vue";
+import { onMounted, ref, reactive } from "vue";
 import { useRouter } from "vue-router";
 import { usePostsStore } from "../../../stores/posts";
-import Header from "../../Layouts/Header.vue";
+import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
+import Header from "../../Layouts/Header.vue";
 import Footer from "../../Layouts/Footer.vue";
 import Button from "../../compos/Button.vue";
 
@@ -81,53 +84,74 @@ export default {
   components: {
     Header,
     SubHeader,
-    Button,
     Footer,
+    Button,
   },
 
   setup() {
     const postsStore = usePostsStore();
     const router = useRouter();
+    const toast = useToast();
     const title = ref("");
     const description = ref("");
     const titleError = ref("");
     const descriptionError = ref("");
 
     onMounted(() => {
-      //showing post input value when click back button from confirm page
-      if (postsStore.post) {
-        title.value = postsStore.post.title;
-        description.value = postsStore.post.description;
-      }
+      //showing post input value from create page
+      title.value = postsStore.post.title;
+      description.value = postsStore.post.description;
     });
 
     const state = reactive({
       post: [],
     });
 
-    //go to create confirm page
-    function toCreateConfirm() {
+    //showing error
+    const showErrorToast = (toastMessage) => {
+      toast.error(toastMessage, {
+        duration: 5000,
+      });
+    };
+
+    //create post
+    async function create() {
       titleError.value = "";
       descriptionError.value = "";
 
       if (!title.value) {
         titleError.value = "Title can't be blank.";
-      } else if (title.value.length > 50) {
-        titleError.value = "50 characters is the maixmun allowed!";
       }
       if (!description.value) {
         descriptionError.value = "Description can't be blank.";
       } else if (description.value.length > 255) {
         descriptionError.value = "255 characters is the maixmun allowed!";
       }
-      if (!titleError.value && !descriptionError.value) {
-        //set values to state.post to store in postsStore
+      if (title.value && description.value) {
+        const params = {
+          title: title.value,
+          description: description.value,
+        };
+
         state.post.title = title.value;
         state.post.description = description.value;
-
-        //set post in store to call from edit confirm page
+        //set post to store
         postsStore.setPost(state.post);
-        router.push({ path: "/posts/create/confirm" });
+
+        try {
+          const response = await postsStore.createPost(params);
+          // if create success, go to post list page
+          if (response.status === 200) {
+            router.push({ path: "/posts" });
+          } else {
+            //if failed, showing toast
+            showErrorToast("Failed to create post! Please try again...");
+          }
+        } catch (error) {
+          //if failed, showing toast
+          console.error(error);
+          showErrorToast("Failed to create post! Please try again...");
+        }
       }
     }
 
@@ -145,9 +169,9 @@ export default {
       titleError,
       description,
       descriptionError,
-      toCreateConfirm,
+      create,
       clearForm,
-      state,
+      showErrorToast,
     };
   },
 };

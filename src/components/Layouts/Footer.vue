@@ -6,23 +6,22 @@
           Seattle Consulting Myanmar
         </div>
         <div class="text-success text-end col-6 fs-5">
-            Copyright © Seattle Consulting Myanmar Co., Ltd. All rights
-            reserved.
+          Copyright © Seattle Consulting Myanmar Co., Ltd. All rights reserved.
         </div>
       </div>
     </div>
   </footer>
 </template>
 
-<script>
-
-</script>
+<script></script>
 
 <style scoped>
 .footer {
   padding: 20px 0;
   background-color: #f8f9fa;
   border-top: 1px solid #e9ecef;
+  position: relative;
+  margin-top: 10px; 
 }
 
 .footer h5 {

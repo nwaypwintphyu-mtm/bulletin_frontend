@@ -4,8 +4,8 @@
     <button
       class="navbar-toggler"
       type="button"
-      data-toggle="collapse"
-      data-target="#navbarSupportedContent"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
       aria-controls="navbarSupportedContent"
       aria-expanded="false"
       aria-label="Toggle navigation"
@@ -17,16 +17,18 @@
       <div class="d-flex justify-content-between w-100">
         <div class="navbar-nav">
           <div class="nav-item">
-            <a class="nav-link text-success" href="#">Users</a>
+            <a class="nav-link text-success" @click="toUser" href="#">Users</a>
           </div>
           <div class="nav-item">
-            <a class="nav-link text-success" href="#">Posts</a>
+            <a class="nav-link text-success" href="#" @click="toPost">Posts</a>
           </div>
         </div>
 
         <div class="d-flex align-items-center">
           <div class="nav-item">
-            <a class="nav-link text-success me-4" href="#">Create User</a>
+            <a class="nav-link text-success me-4" @click="toCreateUser" href="#"
+              >Create User</a
+            >
           </div>
           <div class="nav-item dropdown">
             <a
@@ -34,17 +36,22 @@
               href="#"
               id="navbarDropdown"
               role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
+              data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              {{ user ? user.name : ""}}
+              {{ user ? user.name : "" }}
               <i class="fa fa-user"></i>
             </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Profile</a>
-              <button class="dropdown-item" @click="logout">Logout</button>
-            </div>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li>
+                <button class="dropdown-item" @click="toProfile">
+                  Profile
+                </button>
+              </li>
+              <li>
+                <button class="dropdown-item" @click="logout">Logout</button>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -55,47 +62,71 @@
 <script>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useUsersStore } from "../../stores/users";
+import { useToast } from "vue-toast-notification";
 
 export default {
   setup() {
     const router = useRouter();
     const user = ref(null);
+    const usersStore = useUsersStore();
+    const toast = useToast();
 
     onMounted(() => {
-      const savedUser = localStorage.getItem("user");
+      const savedUser = usersStore.current_user;
       if (savedUser) {
-        user.value = JSON.parse(savedUser);
+        user.value = savedUser;
       }
     });
+
+    const toPost = () => {
+      router.push({ name: "Posts" });
+    };
+
+    const toUser = () => {
+      router.push({ name: "Users" });
+    };
+
+    const showErrorToast = () => {
+      toast.error("Logout failed! Please try again...", {
+        duration: 5000,
+      });
+    };
 
     const logout = async () => {
       try {
         const userId = user.value.id;
-        const response = await fetch(
-          `http://localhost:3002/api/v1/sessions/${userId}`,
-          {
-            method: "DELETE",
-          }
-        );
+        const response = await usersStore.userLogout(userId);
         if (response.status === 200) {
-          localStorage.removeItem("user");
-          router.push({ path: "/login" });
+          router.push({ name: "Login" });
         } else {
-          const errorData = await response.json();
-          console.error(errorData.message);
+          showErrorToast();
         }
       } catch (error) {
-        console.error("Network error:", error);
+        console.error(error);
+        showErrorToast();
       }
+    };
+
+    const toProfile = () => {
+      router.push({ name: "UserProfile" });
+    };
+
+    const toCreateUser = () => {
+      router.push({ name: "Register" });
     };
 
     return {
       user,
       logout,
+      toPost,
+      toUser,
+      toProfile,
+      toCreateUser,
+      showErrorToast,
     };
   },
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
