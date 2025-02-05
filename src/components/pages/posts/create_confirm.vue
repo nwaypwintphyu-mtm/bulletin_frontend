@@ -4,9 +4,8 @@
     <div class="d-flex container flex-column content-box">
       <div class="flex-fill border-success card">
         <SubHeader title="Create Post" />
-        <Button label="Back" route="/posts/create" />
         <div class="p-3">
-          <form @submit.prevent="create">
+          <form @submit.prevent="create" class="mt-5">
             <div class="w-75 m-auto">
               <div class="mb-4 m-auto row">
                 <label
@@ -55,7 +54,7 @@
                   <button
                     type="reset"
                     class="btn btn-secondary"
-                    @click="clearForm"
+                    @click="postCreateCancel"
                   >
                     Cancel
                   </button>
@@ -72,25 +71,25 @@
 
 <script>
 import { onMounted, ref, reactive } from "vue";
+import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
 import { usePostsStore } from "../../../stores/posts";
 import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
 import Header from "../../Layouts/Header.vue";
 import Footer from "../../Layouts/Footer.vue";
-import Button from "../../compos/Button.vue";
 
 export default {
   components: {
     Header,
     SubHeader,
     Footer,
-    Button,
   },
 
   setup() {
     const postsStore = usePostsStore();
     const router = useRouter();
+    const route = useRoute();
     const toast = useToast();
     const title = ref("");
     const description = ref("");
@@ -155,23 +154,18 @@ export default {
       }
     }
 
-    //reset form values
-    const clearForm = () => {
-      title.value = "";
-      description.value = "";
-
-      titleError.value = "";
-      descriptionError.value = "";
-    };
-
+    //when clicking cancel button, go to create post page
+    function postCreateCancel() {
+      router.push({ path: `/posts/create/` });
+    }
     return {
       title,
       titleError,
       description,
       descriptionError,
       create,
-      clearForm,
       showErrorToast,
+      postCreateCancel,
     };
   },
 };
