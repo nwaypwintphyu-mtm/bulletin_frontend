@@ -20,10 +20,8 @@
   padding: 20px 0;
   background-color: #f8f9fa;
   border-top: 1px solid #e9ecef;
-  position: absolute; 
-  bottom: 0; 
-  left: 0;
-  right: 0; 
+  position: relative;
+  margin-top: 10px; 
 }
 
 .footer h5 {

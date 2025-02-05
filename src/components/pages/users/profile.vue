@@ -7,7 +7,7 @@
         <div class="w-25" v-if="current_user">
           <img
             v-if="current_user.profile.url"
-            :src="'http://localhost:3002' + current_user.profile.url"
+            :src="apiUrl + current_user.profile.url"
             alt="Profile Image"
             class="img-fluid rounded"
             style="max-width: 150px; height: auto"
@@ -81,19 +81,21 @@ export default {
     const usersStore = useUsersStore();
     const current_user = ref(null);
     const router = useRouter();
+    const apiUrl = import.meta.env.VITE_API_URL;
 
     onMounted(() => {
       current_user.value = usersStore.current_user;
-
     });
+
+    //formatting date like yy/mm/dd
     function formatDate(dateString) {
       const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      return `${year}/${month}/${day}`;
+      return `${date.getFullYear()}/${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}/${date.getDate().toString().padStart(2, "0")}`;
     }
 
+    //navigate to edit profile
     function toEditProfile() {
       router.push({ name: "EditProfile" });
     }
@@ -101,6 +103,7 @@ export default {
       current_user,
       formatDate,
       toEditProfile,
+      apiUrl,
     };
   },
 };
@@ -110,9 +113,4 @@ export default {
 .card {
   border: 1px solid #e0e0e0;
 }
-.error-box {
-  background-color: rgba(255, 0, 0, 0.133);
-  color: rgb(201, 0, 0);
-}
-
 </style>
