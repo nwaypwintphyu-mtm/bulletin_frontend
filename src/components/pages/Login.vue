@@ -29,6 +29,7 @@
               <div class="col-sm-9">
                 <input
                   type="password"
+                  id="password"
                   class="form-control"
                   v-model="password"
                 />
