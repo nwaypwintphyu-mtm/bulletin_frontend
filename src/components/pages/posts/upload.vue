@@ -22,7 +22,10 @@
                 <button type="submit" @click="upload" class="btn bg-success">
                   Upload</button
                 >&nbsp;
-                <button @click="clearForm" class="btn bg-secondary">
+                <button
+                  type="reset"
+                  class="btn bg-secondary"
+                >
                   Clear
                 </button>
               </div>
