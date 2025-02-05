@@ -17,8 +17,10 @@
         <table class="table w-75">
           <tbody>
             <tr>
-              <td><b>Name</b></td>
-              <td class="userName" v-if="current_user">{{ current_user.name }}</td>
+              <td class="col-3"><b>Name</b></td>
+              <td class="detail-long-text" v-if="current_user">
+                {{ current_user.name }}
+              </td>
             </tr>
             <tr>
               <td><b>Type</b></td>
@@ -113,7 +115,8 @@ export default {
 .card {
   border: 1px solid #e0e0e0;
 }
-.userName {
+
+.detail-long-text {
   word-wrap: break-word;
   white-space: normal;
   max-width: 150px;

@@ -97,7 +97,7 @@
             <tbody>
               <tr v-for="(user, index) in paginatedUsers" :key="user.id">
                 <td>{{ index + 1 + (currentPage - 1) * itemsPerPage }}</td>
-                <td id="userNameLink">
+                <td class="long-text">
                   <a
                     data-toggle="modal"
                     data-target="#userDetailModal"
@@ -151,8 +151,8 @@
                             <table class="table w-75">
                               <tbody>
                                 <tr>
-                                  <td><b>Name</b></td>
-                                  <td class="userNameInModal">
+                                  <td class="col-5"><b>Name</b></td>
+                                  <td class="detail-long-text">
                                     {{ state.selectedUser.name }}
                                   </td>
                                 </tr>
@@ -169,13 +169,13 @@
                                 </tr>
                                 <tr>
                                   <td><b>Email</b></td>
-                                  <td class="">
+                                  <td class="detail-long-text">
                                     {{ state.selectedUser.email }}
                                   </td>
                                 </tr>
                                 <tr>
                                   <td><b>Phone</b></td>
-                                  <td class="">
+                                  <td class="detail-long-text">
                                     {{ state.selectedUser.phone }}
                                   </td>
                                 </tr>
@@ -187,13 +187,13 @@
                                 </tr>
                                 <tr>
                                   <td><b>Address</b></td>
-                                  <td class="">
+                                  <td class="detail-long-text">
                                     {{ state.selectedUser.address }}
                                   </td>
                                 </tr>
                                 <tr>
                                   <td><b>Created Date</b></td>
-                                  <td class="">
+                                  <td class="detail-long-text">
                                     {{
                                       formatDate(state.selectedUser.created_at)
                                     }}
@@ -201,7 +201,7 @@
                                 </tr>
                                 <tr>
                                   <td><b>Created User</b></td>
-                                  <td class="">
+                                  <td class="detail-long-text">
                                     {{ state.selectedUser.create_user_name }}
                                   </td>
                                 </tr>
@@ -215,7 +215,7 @@
                                 </tr>
                                 <tr>
                                   <td><b>Updated User</b></td>
-                                  <td class="updateUserNameInModal">
+                                  <td class="detail-long-text">
                                     {{ state.selectedUser.updated_user_name }}
                                   </td>
                                 </tr>
@@ -236,13 +236,13 @@
                     </div>
                   </div>
                 </td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.create_user_name }}</td>
+                <td class="long-text">{{ user.email }}</td>
+                <td class="long-text">{{ user.create_user_name }}</td>
                 <td v-if="user.role == 0">Admin</td>
                 <td v-else>User</td>
-                <td>{{ user.phone }}</td>
+                <td class="long-text">{{ user.phone }}</td>
                 <td>{{ formatDate(user.dob) }}</td>
-                <td>{{ user.address }}</td>
+                <td class="long-text">{{ user.address }}</td>
                 <td>{{ formatDate(user.created_at) }}</td>
                 <td>{{ formatDate(user.updated_at) }}</td>
                 <td>
@@ -627,13 +627,13 @@ export default {
   vertical-align: middle;
 }
 
-.table td#userNameLink {
+.long-text {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-td.userNameInModal,td.updateUserNameInModal {
+.detail-long-text{
   word-wrap: break-word;
   white-space: normal;
   max-width: 150px;

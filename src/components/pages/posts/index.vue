@@ -50,7 +50,7 @@
             </thead>
             <tbody>
               <tr v-for="post in paginatedPosts" :key="post.id">
-                <td id="postTitleLink">
+                <td class="long-text">
                   <a
                     data-toggle="modal"
                     data-target="#postDetailModal"
@@ -93,13 +93,13 @@
                             <tbody>
                               <tr>
                                 <td class="col-5"><b>Title</b></td>
-                                <td class="col-7 text-danger titleInModal">
+                                <td class="col-7 text-danger detail-long-text">
                                   {{ state.selectedPost.title }}
                                 </td>
                               </tr>
                               <tr>
                                 <td class="col-5"><b>Description</b></td>
-                                <td class="col-7 text-danger descriptionDetail">
+                                <td class="col-7 text-danger detail-long-text">
                                   {{ state.selectedPost.description }}
                                 </td>
                               </tr>
@@ -124,7 +124,7 @@
                               </tr>
                               <tr>
                                 <td class="col-5"><b>Created User</b></td>
-                                <td class="col-7 text-danger createUserInModal">
+                                <td class="col-7 text-danger detail-long-text">
                                   {{ state.createUser }}
                                 </td>
                               </tr>
@@ -138,7 +138,7 @@
                               </tr>
                               <tr>
                                 <td class="col-5"><b>Updated User</b></td>
-                                <td class="col-7 text-danger updateUserInModal">
+                                <td class="col-7 text-danger detail-long-text">
                                   {{ state.updateUser }}
                                 </td>
                               </tr>
@@ -158,8 +158,8 @@
                     </div>
                   </div>
                 </td>
-                <td id="postDescriptionLink">{{ post.description }}</td>
-                <td class="createUser">
+                <td class="long-text">{{ post.description }}</td>
+                <td class="long-text">
                   {{ post.create_user["name"] }}
                 </td>
                 <td>{{ formatDate(post.created_at) }}</td>
@@ -559,22 +559,17 @@ export default {
 }
 
 .table td#postTitleLink,
-td.createUser,
-td.updateUser {
+.long-text {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.table td.createUserInModal,
-td.updateUserInModal,
-td.titleInModal {
+.detail-long-text {
   word-wrap: break-word;
   white-space: normal;
   max-width: 150px;
 }
-
 .table td#postDescriptionLink {
   max-width: 600px;
   overflow: hidden;

@@ -32,7 +32,7 @@
           </div>
           <div class="nav-item dropdown">
             <a
-              class="nav-link text-success dropdown-toggle userName"
+              class="nav-link text-success dropdown-toggle long-text"
               href="#"
               id="navbarDropdown"
               role="button"
@@ -130,7 +130,7 @@ export default {
 </script>
 
 <style scoped>
-.userName {
+.long-text {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
