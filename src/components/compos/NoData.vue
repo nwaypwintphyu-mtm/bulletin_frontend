@@ -1,6 +1,6 @@
 <template>
   <tr>
-    <td :colspan="column" class="text-center">No data available in table</td>
+    <td :colspan="column" class="text-secondary text-center">No data available in table.</td>
   </tr>
 </template>
 <script>
