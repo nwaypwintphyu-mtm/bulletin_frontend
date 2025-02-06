@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  // Your existing code...
+  // Your existing code
 };
 </script>
 
