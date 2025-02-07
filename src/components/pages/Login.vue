@@ -9,8 +9,8 @@
         <form @submit.prevent="login">
           <div class="w-75 m-auto">
             <div class="mb-4 row">
-              <label for="email" class="col-sm-3 col-form-label">Email:</label>
-              <div class="col-sm-9">
+              <label for="email" class="col-3 col-form-label">Email:</label>
+              <div class="col-9">
                 <input
                   type="email"
                   id="email"
@@ -23,10 +23,10 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="password" class="col-sm-3 col-form-label"
+              <label for="password" class="col-3 col-form-label"
                 >Password:</label
               >
-              <div class="col-sm-9">
+              <div class="col-9">
                 <input
                   type="password"
                   id="password"
@@ -39,20 +39,22 @@
               </div>
             </div>
             <div class="mb-4 row align-items-center">
-              <div class="col-sm-3"></div>
-              <div class="col-sm-5">
+              <div class="col-3"></div>
+              <div class="col-4">
                 <input type="checkbox" id="rememberMe" v-model="rememberMe" />
-                <label for="rememberMe" class="ms-2">Remember me</label>
+                <label for="rememberMe" class="m-2">Remember me</label>
               </div>
-              <div class="col-md-4 text-end">
-                <router-link to="/forgot" class="text-decoration-none"
+              <div class="col-5 text-end">
+                <router-link
+                  to="/forgot"
+                  class="text-decoration-none text-primary"
                   >Forgotten password?</router-link
                 >
               </div>
             </div>
             <div class="mb-4 row">
-              <div class="col-sm-3"></div>
-              <div class="col-sm-9">
+              <div class="col-3"></div>
+              <div class="col-9">
                 <button type="submit" class="btn bg-success w-100">
                   Login
                 </button>
