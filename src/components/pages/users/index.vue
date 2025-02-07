@@ -41,7 +41,7 @@
         </div>
         <div class="p-3">
           <div class="row mb-3">
-            <div class="col-md-3 row align-items-center">
+            <div class="col-3 row align-items-center">
               <div class="col-2">
                 <label for="">Name:</label>
               </div>
@@ -49,7 +49,7 @@
                 <input type="text" class="form-control" v-model="nameSearch" />
               </div>
             </div>
-            <div class="col-md-3 row align-items-center">
+            <div class="col-3 row align-items-center">
               <div class="col-2">
                 <label for="">Email:</label>
               </div>
@@ -57,7 +57,7 @@
                 <input type="text" class="form-control" v-model="emailSearch" />
               </div>
             </div>
-            <div class="col-md-3 row align-items-center">
+            <div class="col-3 row align-items-center">
               <div class="col-2">
                 <label for="">From:</label>
               </div>
@@ -66,7 +66,7 @@
               </div>
             </div>
 
-            <div class="col-md-3 row align-items-center">
+            <div class="col-3 row align-items-center">
               <div class="col-2">
                 <label for="">To:</label>
               </div>
@@ -94,7 +94,7 @@
                 <th>Operation</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody v-if="paginatedUsers.length != 0">
               <tr v-for="(user, index) in paginatedUsers" :key="user.id">
                 <td>{{ index + 1 + (currentPage - 1) * itemsPerPage }}</td>
                 <td class="long-text">
@@ -122,7 +122,7 @@
                       <div class="modal-content p-3">
                         <div class="modal-header">
                           <h6
-                            class="modal-title col-md-11"
+                            class="modal-title col-11"
                             id="exampleModalLongTitle"
                           >
                             User Detail
@@ -270,7 +270,7 @@
                       <div class="modal-content">
                         <div class="modal-header">
                           <h6
-                            class="modal-title col-md-11"
+                            class="modal-title col-11"
                             id="exampleModalLongTitle"
                           >
                             Delete Confirm
@@ -360,6 +360,9 @@
                 </td>
               </tr>
             </tbody>
+            <tbody v-else>
+              <NoData :column="11" />
+            </tbody>
           </table>
           <div class="pagination">
             <button
@@ -399,6 +402,7 @@ import { reactive, onMounted, ref, computed } from "vue";
 import { useUsersStore } from "../../../stores/users";
 import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
+import NoData from "../../compos/NoData.vue";
 import Header from "../../Layouts/Header.vue";
 import Footer from "../../Layouts/Footer.vue";
 import DatePicker from "../../compos/DatePicker.vue";
@@ -406,6 +410,7 @@ import DatePicker from "../../compos/DatePicker.vue";
 export default {
   components: {
     SubHeader,
+    NoData,
     Header,
     Footer,
     DatePicker,
@@ -633,7 +638,7 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.detail-long-text{
+.detail-long-text {
   word-wrap: break-word;
   white-space: normal;
   max-width: 150px;
