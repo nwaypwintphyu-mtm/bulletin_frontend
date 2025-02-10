@@ -2,12 +2,12 @@
   <div class="container-fluid">
     <div class="card w-50 m-auto mt-5 rounded shadow">
       <SubHeader title="Register" />
-      <Button label="Back" route="/posts" />
+      <Button label="Back" @click="removeSetData" route="/posts" />
       <div class="card-body">
         <form @submit.prevent="toRegisterConfirm">
           <div class="w-75 m-auto">
             <div class="mb-4 row">
-              <label for="name" class="required col-4 col-form-label"
+              <label for="name" class="text-end required col-4 col-form-label"
                 >Name</label
               >
               <div class="col-8">
@@ -18,7 +18,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="email" class="required col-4 col-form-label"
+              <label for="email" class="text-end required col-4 col-form-label"
                 >E-Mail Address</label
               >
               <div class="col-8">
@@ -29,7 +29,9 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="password" class="required col-4 col-form-label"
+              <label
+                for="password"
+                class="text-end required col-4 col-form-label"
                 >Password</label
               >
               <div class="col-8">
@@ -47,7 +49,7 @@
             <div class="mb-4 row">
               <label
                 for="confirm_password"
-                class="required col-4 col-form-label"
+                class="text-end required col-4 col-form-label"
                 >Confirm password</label
               >
               <div class="col-8">
@@ -66,7 +68,9 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="role" class="col-4 col-form-label">Type</label>
+              <label for="role" class="text-end col-4 col-form-label"
+                >Type</label
+              >
               <div class="col-8">
                 <select
                   name="role"
@@ -80,7 +84,9 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="phone" class="col-4 col-form-label">Phone</label>
+              <label for="phone" class="text-end col-4 col-form-label"
+                >Phone</label
+              >
               <div class="col-8">
                 <input
                   type=""
@@ -94,7 +100,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="dob" class="col-4 col-form-label"
+              <label for="dob" class="text-end col-4 col-form-label"
                 >Date of birth</label
               >
               <div class="col-8">
@@ -102,7 +108,9 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="address" class="col-4 col-form-label">Address</label>
+              <label for="address" class="text-end col-4 col-form-label"
+                >Address</label
+              >
               <div class="col-8">
                 <input
                   type=""
@@ -113,16 +121,13 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="profile" class="required col-4 col-form-label"
+              <label
+                for="profile"
+                class="text-end required col-4 col-form-label"
                 >Profile</label
               >
               <div class="col-5 ms-4">
-                <div>
-                  <FileUpload @file-selected="onFileSelected" />
-                </div>
-                <div v-if="state.profileError" class="text-danger mt-3">
-                  {{ state.profileError }}
-                </div>
+                <FileUpload @file-selected="onFileSelected" />
                 <div v-if="state.profileError" class="text-danger mt-3">
                   {{ state.profileError }}
                 </div>
@@ -171,6 +176,7 @@ export default {
     const router = useRouter();
     const usersStore = useUsersStore();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
 
     onMounted(() => {
       name.value = usersStore.name;
@@ -198,6 +204,11 @@ export default {
     //get date from datepicker component
     function getDate(date) {
       dob.value = date;
+    }
+
+    //remove set data after user creation or cancel
+    function removeSetData() {
+      usersStore.removeUserData();
     }
 
     //get file from fileupload component
@@ -232,19 +243,46 @@ export default {
       if (!password.value) {
         state.passwordError = "Password can't be blank.";
       }
-      if (phone.value.length > 12) {
-        state.phoneError = "Phone number too long.";
+
+      if (phone.value.length > 12 || phone.value.length < 8) {
+        state.phoneError = "Phone number must be between 8 and 12 numbers";
       }
+      if (!/^\d+$/.test(phone.value)) {
+        state.phoneError = "Phone number must contain only digits.";
+      }
+
       if (!confirm_password.value) {
         state.confirm_passwordError = "Confirm password can't be blank.";
       }
       if (!profile.value) {
         state.profileError = "Profile can't be blank.";
       }
+
+      //check size
+      const maxFileSize = 2 * 1024 * 1024;
+      if (profile.value) {
+        if (profile.value.size > maxFileSize) {
+          state.profileError = "Profile size exceeds 2MB.";
+        }
+      }
+
+      if (profile.value && !allowedTypes.includes(profile.value.type)) {
+        state.profileError = "Please choose an image file.";
+      }
+
+      //check password pattern
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[^\s]+$/;
+      if (password.value.length < 8) {
+        state.passwordError = "Password must be at least 8 characters.";
+      } else if (!passwordRegex.test(password.value)) {
+        state.passwordError =
+          "Password must include at least 1 uppercase letter, 1 number, and no spaces.";
+      }
+
       if (
         password.value &&
         confirm_password.value &&
-        password.value != confirm_password.value
+        password.value !== confirm_password.value
       ) {
         state.passwordError =
           "Password and password confirmation is not match.";
@@ -292,6 +330,7 @@ export default {
       onFileSelected,
       dob,
       state,
+      removeSetData,
     };
   },
 };

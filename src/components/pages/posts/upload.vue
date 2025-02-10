@@ -22,12 +22,7 @@
                 <button type="submit" @click="upload" class="btn bg-success">
                   Upload</button
                 >&nbsp;
-                <button
-                  type="reset"
-                  class="btn bg-secondary"
-                >
-                  Clear
-                </button>
+                <button type="reset" class="btn bg-secondary">Clear</button>
               </div>
             </div>
           </div>
@@ -82,56 +77,98 @@ export default {
         return;
       }
 
+      //check size
+      const maxFileSize = 10 * 1024 * 1024;
+      if (state.file.size > maxFileSize) {
+        state.fileError = "File size must be less than 10MB.";
+        return;
+      }
+
       if (!allowedTypes.includes(state.file.type)) {
         state.fileError = "Please choose a csv format.";
         return;
       }
 
-      const reader = new FileReader();
+      if (state.file) {
+        const reader = new FileReader();
 
-      //read csv fil
-      reader.onload = async () => {
-        const fileContent = reader.result;
-        //get rows
-        const rows = fileContent.split("\n").filter((row) => row.trim() !== "");
+        //read csv fil
+        reader.onload = async () => {
+          const fileContent = reader.result;
+          //get rows
+          const rows = fileContent
+            .split("\n")
+            .filter((row) => row.trim() !== "");
 
-        //get columns
-        const columns = rows.map((row) => row.split(","));
+          //get columns
+          const columns = rows.map((row) => row.split(","));
 
-        //column limit
-        const columnLimit = columns[0].length;
+          // check for invalid column title for post
+          if (columns) {
+            if (columns[0][0].trim() !== "title") {
+              state.fileError =
+                "Title for post title column must be 'title' in your csv file.";
+            }
+            if (columns[0][1].trim() !== "description") {
+              state.fileError =
+                "Title for post description column must be 'description' in your csv file.";
+            }
+            if (columns[0][2].trim() !== "status") {
+              state.fileError =
+                "Title for post status column must be 'status' in your csv file.";
+            }
+          }
+          // check for multiple row with same items
+          const allRows = new Set();
+          for (let i = 1; i < columns.length; i++) {
+            const title = columns[i][0];
+            const description = columns[i][1];
+            const status = columns[i][2];
 
-        //if col > 3 show error
-        if (columnLimit > 3) {
-          state.fileError = "Post upload csv must have 3 columns.";
-          return;
-        }
+            const duplicateRows = `${title}-${description}-${status}`;
 
-        if (!state.fileError) {
-          const formData = new FormData();
-          formData.append("posts", state.file);
-          try {
-            const response = await postsStore.uploadPost(formData);
-            if (response.status === 200) {
-              router.push({ name: "Posts" });
-            } else {
+            if (allRows.has(duplicateRows)) {
+              state.fileError = `Duplicate rows found. Rows must be unique.`;
+              return;
+            }
+            allRows.add(duplicateRows);
+          }
+
+          //column limit
+          const columnLimit = columns[0].length;
+
+          //if col > 3 show error
+          if (columnLimit > 3) {
+            state.fileError = "Post upload csv must have 3 columns.";
+            return;
+          }
+
+          if (!state.fileError) {
+            const formData = new FormData();
+            formData.append("posts", state.file);
+            try {
+              const response = await postsStore.uploadPost(formData);
+              if (response.status === 200) {
+                router.push({ name: "Posts" });
+              } else {
+                showErrorToast(
+                  "Failed to upload post with csv! Please try again..."
+                );
+              }
+            } catch (error) {
+              console.error(error);
               showErrorToast(
                 "Failed to upload post with csv! Please try again..."
               );
             }
-          } catch (error) {
-            console.error(error);
-            showErrorToast(
-              "Failed to upload post with csv! Please try again..."
-            );
           }
-        }
-      };
-      reader.onerror = () => {
-        state.fileError = "Error reading the file.";
-      };
-      //set file into state.file
-      reader.readAsText(state.file);
+        };
+        reader.onerror = () => {
+          state.fileError = "Error reading the file.";
+        };
+        //set file into state.file
+        reader.readAsText(state.file);
+      }
     }
 
     return {

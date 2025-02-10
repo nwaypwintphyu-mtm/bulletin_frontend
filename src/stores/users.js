@@ -34,6 +34,19 @@ export const useUsersStore = defineStore("user", {
       this.confirm_profile = data.confirm_profile;
     },
 
+    //remove user from register page after creation
+    removeUserData() {
+      this.name = "";
+      this.email = "";
+      this.password = "";
+      this.confirm_password = "";
+      this.phone = "";
+      this.dob = "";
+      this.address = "";
+      this.profile = "";
+      this.confirm_profile = "";
+    },
+
     //user login
     async userLogin(params) {
       try {

@@ -10,8 +10,8 @@
         <form @submit.prevent="resetPassword">
           <div class="w-75 m-auto">
             <div class="mb-4 row">
-              <label for="new_password" class="col-4 col-form-label"
-                >New password</label
+              <label for="new_password" class="col-4 col-form-label text-end"
+                >Password:</label
               >
               <div class="col-8">
                 <input
@@ -26,8 +26,10 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="new_confirm_password" class="col-4 col-form-label"
-                >Confirm password</label
+              <label
+                for="new_confirm_password"
+                class="col-4 col-form-label text-end"
+                >Password Confirmation:</label
               >
               <div class="col-8">
                 <input
@@ -51,7 +53,7 @@
               <div class="col-4"></div>
               <div class="col-8">
                 <button class="btn bg-success w-100" @click="updatePassword">
-                  Reset Password
+                  Update Password
                 </button>
               </div>
             </div>
@@ -66,6 +68,7 @@
 import { onMounted, reactive, ref } from "vue";
 import { useUsersStore } from "../../stores/users";
 import { useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import SubHeader from "../Layouts/SubHeader.vue";
 import Button from "../compos/Button.vue";
@@ -77,6 +80,7 @@ export default {
   },
   setup() {
     const route = useRoute();
+    const router = useRouter();
     const toast = useToast();
     const new_password = ref("");
     const new_confirm_password = ref("");
@@ -107,6 +111,16 @@ export default {
       state.new_confirm_passwordError = "";
       state.new_passwordError = "";
       state.passwordMatchError = "";
+
+      //check password pattern
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[^\s]+$/;
+      if (new_password.value.length < 8) {
+        state.new_passwordError = "Password must be at least 8 characters.";
+      } else if (!passwordRegex.test(new_password.value)) {
+        state.new_passwordError =
+          "Password must include at least 1 uppercase letter, 1 number, and no spaces.";
+      }
+
       if (!new_password.value) {
         state.new_passwordError = "New password can't be blank.";
       }
@@ -131,7 +145,7 @@ export default {
           const response = await usersStore.resetPassword(formData);
           //if success show success message
           if (response.status === 200) {
-            state.successMessage = response.message;
+            router.push({ name: "Login" });
           } else {
             //if failed, show toast
             showErrorToast("Failed to reset password! Please try again...");
@@ -164,10 +178,5 @@ export default {
 .success-box {
   background-color: rgba(145, 255, 0, 0.133);
   color: rgb(70, 201, 0);
-}
-
-label::after {
-  content: " *";
-  color: red;
 }
 </style>

@@ -25,7 +25,7 @@
         <form @submit.prevent="Register" enctype="multipart/form-data">
           <div class="w-75 m-auto">
             <div class="mb-4 row">
-              <label for="name" class="required col-4 col-form-label"
+              <label for="name" class="text-end required col-4 col-form-label"
                 >Name</label
               >
               <div class="col-8">
@@ -33,7 +33,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="email" class="required col-4 col-form-label"
+              <label for="email" class="text-end required col-4 col-form-label"
                 >E-Mail Address</label
               >
               <div class="col-8">
@@ -46,11 +46,12 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="password" class="required col-4 col-form-label"
+              <label for="password" class="text-end required col-4 col-form-label"
                 >Password</label
               >
               <div class="col-8">
                 <input
+                  type="password"
                   id="password"
                   class="form-control"
                   v-model="password"
@@ -61,11 +62,12 @@
             <div class="mb-4 row">
               <label
                 for="confirm_password"
-                class="required col-4 col-form-label"
+                class="text-end required col-4 col-form-label"
                 >Confirm password</label
               >
               <div class="col-8">
                 <input
+                  type="password"
                   id="confirm_password"
                   class="form-control"
                   v-model="confirm_password"
@@ -74,7 +76,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="role" class="col-4 col-form-label">Type</label>
+              <label for="role" class="text-end col-4 col-form-label">Type</label>
               <div class="col-8">
                 <!-- fix showing role in view -->
                 <input
@@ -87,13 +89,13 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="phone" class="col-4 col-form-label">Phone</label>
+              <label for="phone" class="text-end col-4 col-form-label">Phone</label>
               <div class="col-8">
                 <input class="form-control" v-model="phone" readonly />
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="dob" class="col-4 col-form-label"
+              <label for="dob" class="text-end col-4 col-form-label"
                 >Date of birth</label
               >
               <div class="col-8">
@@ -101,7 +103,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="address" class="col-4 col-form-label">Address</label>
+              <label for="address" class="text-end col-4 col-form-label">Address</label>
               <div class="col-8">
                 <input
                   type=""
@@ -113,7 +115,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="profile" class="col-4 col-form-label">Profile</label>
+              <label for="profile" class="text-end col-4 col-form-label">Profile</label>
               <div class="col-8">
                 <div v-if="confirm_profile">
                   <img
@@ -131,7 +133,7 @@
             <div class="mb-4 row">
               <div class="col-sm-4"></div>
               <div class="col-sm-8">
-                <button type="submit" class="btn bg-success">Confirm</button
+                <button type="submit" class="text-end btn bg-success">Confirm</button
                 >&nbsp;
                 <button
                   type="button"
@@ -229,6 +231,7 @@ export default {
       try {
         const response = await usersStore.setUsers(formData);
         if (response.status === 201) {
+          usersStore.removeUserData();
           router.push({ name: "Users" });
         } else if (response.status === 422) {
           duplicateError.value = "Email already exists!";

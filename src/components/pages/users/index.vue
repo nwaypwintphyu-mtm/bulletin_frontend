@@ -426,6 +426,7 @@ export default {
     const currentPage = ref(1);
     const toast = useToast();
     const apiUrl = import.meta.env.VITE_API_URL;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const state = reactive({
       users: [],
@@ -491,6 +492,10 @@ export default {
 
     //filtered users
     function search() {
+      state.successMsg = "";
+      if (emailSearch.value && !emailPattern.test(emailSearch.value)) {
+        state.successMsg = "Search with correct email format.";
+      }
       if (
         !nameSearch.value &&
         !emailSearch.value &&

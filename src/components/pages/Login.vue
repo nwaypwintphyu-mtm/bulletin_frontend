@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid">
     <div class="card w-50 m-auto mt-5 rounded shadow">
-      <SubHeader title="Login" />
+      <SubHeader title="Log in" />
       <div v-if="errorMessage" class="error-box p-3 text-start">
         {{ errorMessage }}
       </div>

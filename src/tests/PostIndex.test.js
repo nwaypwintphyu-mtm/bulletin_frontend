@@ -36,19 +36,23 @@ describe("PostIndex", () => {
     expect(searchBox.exists()).toBe(true);
 
     const buttons = wrapper.findAll(".btn");
-    const searchButton = buttons[0];
+    const bulletinButton = buttons[0];
+    expect(bulletinButton.exists()).toBe(true);
+    expect(bulletinButton.text()).toBe("Bulletin_Board");
+
+    const searchButton = buttons[1];
     expect(searchButton.exists()).toBe(true);
     expect(searchButton.text()).toBe("Search");
 
-    const createButton = buttons[1];
+    const createButton = buttons[2];
     expect(createButton.exists()).toBe(true);
     expect(createButton.text()).toBe("Create");
 
-    const uploadButton = buttons[2];
+    const uploadButton = buttons[3];
     expect(uploadButton.exists()).toBe(true);
     expect(uploadButton.text()).toBe("Upload");
 
-    const downLoadButton = buttons[3];
+    const downLoadButton = buttons[4];
     expect(downLoadButton.exists()).toBe(true);
     expect(downLoadButton.text()).toBe("Download");
 
@@ -61,37 +65,36 @@ describe("PostIndex", () => {
     const wrapper = mount(PostIndex);
     const searchSpy = vi.spyOn(wrapper.vm, "search");
 
-    const searchButton = wrapper.findAll(".btn")[0];
+    const searchButton = wrapper.findAll(".btn")[1];
     await searchButton.trigger("click");
 
     expect(searchSpy).toHaveBeenCalled();
   });
 
   //test for create button click
-  it('should redirect to create page when click create button', async () => {
-    const mockPush = vi.fn(); 
-  
+  it("should redirect to create page when click create button", async () => {
+    const mockPush = vi.fn();
+
     const router = createRouter({
       history: createWebHistory(),
       routes: [
-        { path: '/posts/create', name: 'create-post', component: {} }, 
-        { path: '/posts/create/:id', name: 'create-post-id', component: {} },
+        { path: "/posts/create", name: "create-post", component: {} },
+        { path: "/posts/create/:id", name: "create-post-id", component: {} },
       ],
     });
-  
+
     const wrapper = mount(PostIndex, {
       global: {
         plugins: [router],
       },
     });
-  
+
     router.push = mockPush;
-  
-    const createButton = wrapper.findAll('.btn')[1];  
-    await createButton.trigger('click');
-  
+
+    const createButton = wrapper.findAll(".btn")[2];
+    await createButton.trigger("click");
+
     await router.isReady();
-    expect(mockPush).toHaveBeenCalledWith({ path: '/posts/create' });  
+    expect(mockPush).toHaveBeenCalledWith({ path: "/posts/create" });
   });
-  
 });
