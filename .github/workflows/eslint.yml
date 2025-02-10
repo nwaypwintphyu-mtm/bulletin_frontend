@@ -1,0 +1,31 @@
+name: Run ESLint
+
+on:
+  push:
+    branches-ignore:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Specify the Node.js version you need
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          npm install  # or 'yarn install' if you're using Yarn
+
+      # Step 4: Run ESLint
+      - name: Run ESLint
+        run: |
+          npx eslint . --ext .js,.vue,.ts  # Adjust extensions based on your project
