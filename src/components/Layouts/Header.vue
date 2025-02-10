@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light ps-3 pe-5">
-    <a class="navbar-brand text-success fs-4" href="#">Bulletin_Board</a>
+    <a class="navbar-brand text-success btn fs-4" @click="toPost">Bulletin_Board</a>
     <button
       class="navbar-toggler"
       type="button"

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="p-3">
     <label class="custom-file-label" for="fileInput">
       {{ displayFileName }}
     </label>

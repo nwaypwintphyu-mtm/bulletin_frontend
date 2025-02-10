@@ -122,6 +122,14 @@ export default {
       if (!new_password.value) {
         state.new_passwordError = "New password can't be blank.";
       }
+      //check password pattern
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[^\s]+$/;
+      if (new_password.value.length < 8) {
+        state.new_passwordError = "Password must be at least 8 characters.";
+      } else if (!passwordRegex.test(new_password.value)) {
+        state.new_passwordError =
+          "Password must include at least 1 uppercase letter, 1 number, and no spaces.";
+      }
       if (!new_confirm_password.value) {
         state.new_confirm_passwordError =
           "New confirm password can't be blank.";

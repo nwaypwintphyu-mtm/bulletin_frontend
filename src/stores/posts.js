@@ -81,7 +81,7 @@ export const usePostsStore = defineStore("posts", {
             status: response.status,
           };
         }
-        this.successMessage = "Posts created successfully.";
+        this.successMessage = "Posts uploaded successfully.";
         return {
           status: response.status,
         };

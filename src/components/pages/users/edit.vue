@@ -7,7 +7,9 @@
         <form @submit.prevent="">
           <div class="w-75 m-auto">
             <div class="mb-4 row">
-              <label for="name" class="col-3 col-form-label">Name:</label>
+              <label for="name" class="text-end col-3 col-form-label"
+                >Name:</label
+              >
               <div class="col-9">
                 <input type="" id="name" class="form-control" v-model="name" />
                 <div v-if="state.nameError" class="text-danger mt-1">
@@ -16,7 +18,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="email" class="col-3 col-form-label"
+              <label for="email" class="text-end col-3 col-form-label"
                 >Email Address:</label
               >
               <div class="col-9">
@@ -32,7 +34,9 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="role" class="col-3 col-form-label">Type:</label>
+              <label for="role" class="text-end col-3 col-form-label"
+                >Type:</label
+              >
               <div class="col-9">
                 <select
                   name="role"
@@ -46,7 +50,9 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="phone" class="col-3 col-form-label">Phone:</label>
+              <label for="phone" class="text-end col-3 col-form-label"
+                >Phone:</label
+              >
               <div class="col-9">
                 <input
                   type=""
@@ -60,7 +66,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="dob" class="col-3 col-form-label"
+              <label for="dob" class="text-end col-3 col-form-label"
                 >Date of Birth:</label
               >
               <div class="col-9">
@@ -68,7 +74,9 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="address" class="col-3 col-form-label">Address:</label>
+              <label for="address" class="text-end col-3 col-form-label"
+                >Address:</label
+              >
               <div class="col-9">
                 <input
                   type=""
@@ -79,7 +87,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="old_profile" class="col-3 col-form-label"
+              <label for="old_profile" class="text-end col-3 col-form-label"
                 >Old profile:</label
               >
               <div class="w-25 ms-4" v-if="current_user">
@@ -97,7 +105,7 @@
               </div>
             </div>
             <div class="mb-4 row">
-              <label for="new_profile" class="col-3 col-form-label"
+              <label for="new_profile" class="text-end col-3 col-form-label"
                 >New Profile:</label
               >
               <div class="col-8 ms-4">
@@ -105,9 +113,8 @@
                   :initial-image="getInitialImage()"
                   @file-selected="onFileSelected"
                 />
-
-                <div v-if="state.profileTypeError" class="text-danger mt-1">
-                  {{ state.profileTypeError }}
+                <div v-if="state.profileError" class="text-danger mt-1">
+                  {{ state.profileError }}
                 </div>
               </div>
             </div>
@@ -174,7 +181,7 @@ export default {
       nameError: "",
       emailError: "",
       phoneError: "",
-      profileTypeError: "",
+      profileError: "",
     });
 
     onMounted(() => {
@@ -211,8 +218,10 @@ export default {
 
     //get selected file from fileupload component
     function onFileSelected(file) {
-      state.profile = file;
-      state.preview_profile = URL.createObjectURL(file);
+      if (file) {
+        state.profile = file;
+        state.preview_profile = URL.createObjectURL(file);
+      }
     }
 
     //get date from datepicker component
@@ -251,17 +260,24 @@ export default {
       }
 
       if (state.profile && !allowedTypes.includes(state.profile.type)) {
-        state.profileTypeError = "Please choose an image file.";
+        state.profileError = "Please choose an image file.";
+      }
+      //check size
+      const maxFileSize = 2 * 1024 * 1024;
+      if (state.profile.size > maxFileSize) {
+        state.profileError = "Profile size exceeds 2MB.";
       }
 
-      if (phone.value.length > 12) {
-        state.phoneError = "Phone number is too long.";
+      if (phone.value.length > 12 || phone.value.length < 8) {
+        state.phoneError = "Phone number must be between 8 and 12 numbers";
       }
-
+      if (!/^\d+$/.test(phone.value)) {
+        state.phoneError = "Phone number must contain only digits.";
+      }
       if (
         !state.nameError &&
         !state.emailError &&
-        !state.profileTypeError &&
+        !state.profileError &&
         !state.phoneError
       ) {
         if (!state.profile) {
