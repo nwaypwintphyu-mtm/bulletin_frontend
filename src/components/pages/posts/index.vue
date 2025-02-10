@@ -48,7 +48,7 @@
                 <th>Operation</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody v-if="paginatedPosts.length != 0">
               <tr v-for="post in paginatedPosts" :key="post.id">
                 <td class="long-text">
                   <a
@@ -267,11 +267,14 @@
                 </td>
               </tr>
             </tbody>
+            <tbody v-else>
+              <NoData :column="5" />
+            </tbody>
           </table>
           <div class="pagination">
             <button
+              class="btn bg-success"
               @click="prevPage"
-              class="bg-success"
               :disabled="currentPage === 1"
             >
               Previous
@@ -306,12 +309,14 @@ import { usePostsStore } from "../../../stores/posts";
 import { useRouter } from "vue-router";
 import { useToast } from "vue-toast-notification";
 import SubHeader from "../../Layouts/SubHeader.vue";
+import NoData from "../../compos/NoData.vue";
 import Header from "../../Layouts/Header.vue";
 import Footer from "../../Layouts/Footer.vue";
 
 export default {
   components: {
     Header,
+    NoData,
     SubHeader,
     Footer,
   },
