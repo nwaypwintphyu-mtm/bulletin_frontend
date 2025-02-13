@@ -141,7 +141,7 @@
                             <div class="w-25">
                               <img
                                 v-if="state.selectedUser.profile"
-                                :src="apiUrl + state.selectedUser.profile.url"
+                                :src="state.selectedUser.profile.url"
                                 alt="Profile Image"
                                 class="img-fluid rounded"
                                 style="max-width: 100px; height: auto"
@@ -425,7 +425,6 @@ export default {
     const itemsPerPage = 5;
     const currentPage = ref(1);
     const toast = useToast();
-    const apiUrl = import.meta.env.VITE_API_URL;
 
     const state = reactive({
       users: [],
@@ -591,7 +590,6 @@ export default {
       nextPage,
       gotoPage,
       showErrorToast,
-      apiUrl,
       itemsPerPage,
       removeMsg,
     };

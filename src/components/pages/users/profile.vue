@@ -7,7 +7,7 @@
         <div class="w-25" v-if="current_user">
           <img
             v-if="current_user.profile.url"
-            :src="apiUrl + current_user.profile.url"
+            :src="current_user.profile.url"
             alt="Profile Image"
             class="img-fluid rounded"
             style="max-width: 150px; height: auto"
@@ -83,7 +83,6 @@ export default {
     const usersStore = useUsersStore();
     const current_user = ref(null);
     const router = useRouter();
-    const apiUrl = import.meta.env.VITE_API_URL;
 
     onMounted(() => {
       current_user.value = usersStore.current_user;
@@ -105,7 +104,6 @@ export default {
       current_user,
       formatDate,
       toEditProfile,
-      apiUrl,
     };
   },
 };

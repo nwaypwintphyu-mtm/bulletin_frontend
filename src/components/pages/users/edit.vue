@@ -86,9 +86,7 @@
                 <img
                   :src="
                     state.preview_profile ||
-                    (current_user.profile.url
-                      ? apiUrl + current_user.profile.url
-                      : '')
+                    (current_user.profile.url ? current_user.profile.url : '')
                   "
                   alt="Profile Image"
                   class="img-fluid rounded"
@@ -166,7 +164,6 @@ export default {
     const profile = ref(null);
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-    const apiUrl = import.meta.env.VITE_API_URL;
 
     const state = reactive({
       profile: null,
@@ -179,6 +176,7 @@ export default {
 
     onMounted(() => {
       current_user.value = usersStore.current_user; //get current user from store
+
       name.value = current_user.value.name;
       email.value = current_user.value.email;
       phone.value = current_user.value.phone;
@@ -188,25 +186,15 @@ export default {
       profile.value = current_user.value.profile;
     });
 
-    //get previous image if exist
     function getInitialImage() {
       if (
         current_user.value &&
         current_user.value.profile &&
         current_user.value.profile.url
       ) {
-        return getFilename(current_user.value.profile.url);
+        return current_user.value.profile_file_name;
       }
-      //if not exist, return null
       return null;
-    }
-
-    //get file name of previous image to show in file upload box
-    function getFilename(path) {
-      if (path) {
-        const pathParts = path.split("/");
-        return pathParts[pathParts.length - 1];
-      }
     }
 
     //get selected file from fileupload component
@@ -265,7 +253,7 @@ export default {
         !state.phoneError
       ) {
         if (!state.profile) {
-          state.profile = getFilename(current_user.value.profile.url);
+          state.profile = current_user.value.profile_file_name;
         }
         const formData = new FormData();
         formData.append("user[name]", name.value);
@@ -313,7 +301,6 @@ export default {
       clear,
       getDate,
       toChangePassword,
-      apiUrl,
     };
   },
 };
